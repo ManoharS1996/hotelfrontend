@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Text, StyleSheet, Image, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const OffersScreen = ({ navigation }) => {
@@ -132,6 +132,20 @@ const OffersScreen = ({ navigation }) => {
     return false;
   });
 
+  const handleAddToCart = (offer) => {
+    navigation.navigate('Cart', { 
+      addedItem: {
+        id: offer.id,
+        name: offer.name,
+        description: offer.description,
+        price: offer.price,
+        image: offer.image
+      }
+    });
+    setSelectedOffer(null);
+    Alert.alert('Success', `${offer.name} added to cart!`);
+  };
+
   const renderOfferDetails = (offer) => {
     return (
       <View style={styles.detailsContainer}>
@@ -173,7 +187,10 @@ const OffersScreen = ({ navigation }) => {
 
           <Text style={styles.description}>{offer.description}</Text>
 
-          <TouchableOpacity style={styles.addToCartButton}>
+          <TouchableOpacity 
+            style={styles.addToCartButton}
+            onPress={() => handleAddToCart(offer)}
+          >
             <Text style={styles.addToCartText}>ADD TO CART</Text>
           </TouchableOpacity>
         </View>

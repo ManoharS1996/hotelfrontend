@@ -30,6 +30,24 @@ const Title = styled.Text`
   color: #fff;
 `;
 
+const MethodSelector = styled.View`
+  flex-direction: row;
+  margin-bottom: 20px;
+  justify-content: space-around;
+`;
+
+const MethodButton = styled.TouchableOpacity`
+  padding: 10px 20px;
+  border-radius: 5px;
+  background-color: ${props => props.active ? '#3498db' : 'transparent'};
+  border: 1px solid #3498db;
+`;
+
+const MethodButtonText = styled.Text`
+  color: ${props => props.active ? '#fff' : '#3498db'};
+  font-weight: ${props => props.active ? 'bold' : 'normal'};
+`;
+
 const LinkText = styled.Text`
   color: #3498db;
   text-align: center;
@@ -37,30 +55,41 @@ const LinkText = styled.Text`
 `;
 
 const ForgotPasswordScreen = () => {
+  const [method, setMethod] = useState('email');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [popupVisible, setPopupVisible] = useState(false);
   const navigation = useNavigation();
 
   const handleForgotPassword = async () => {
-    if (!email) {
+    if (method === 'email' && !email) {
       setError('Please enter your email');
       return;
     }
 
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
+    if (method === 'phone' && !phone) {
+      setError('Please enter your phone number');
+      return;
+    }
+
+    if (method === 'email' && !/^\S+@\S+\.\S+$/.test(email)) {
       setError('Please enter a valid email address');
       return;
     }
 
     setLoading(true);
     try {
-      await axios.post(
+      const response = await axios.post(
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.FORGOT_PASSWORD}`, 
-        { email },
+        { 
+          [method]: method === 'email' ? email : phone,
+          method 
+        },
         { timeout: API_CONFIG.TIMEOUT }
       );
+      
       setPopupVisible(true);
       setError('');
     } catch (err) {
@@ -76,15 +105,41 @@ const ForgotPasswordScreen = () => {
       <Content>
         <Title>Forgot Password</Title>
 
-        <Input
-          label="Email"
-          placeholder="Enter your registered email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          error={error}
-        />
+        <MethodSelector>
+          <MethodButton 
+            active={method === 'email'}
+            onPress={() => setMethod('email')}
+          >
+            <MethodButtonText active={method === 'email'}>Email</MethodButtonText>
+          </MethodButton>
+          <MethodButton 
+            active={method === 'phone'}
+            onPress={() => setMethod('phone')}
+          >
+            <MethodButtonText active={method === 'phone'}>Phone</MethodButtonText>
+          </MethodButton>
+        </MethodSelector>
+
+        {method === 'email' ? (
+          <Input
+            label="Email"
+            placeholder="Enter your registered email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            error={error && method === 'email' ? error : ''}
+          />
+        ) : (
+          <Input
+            label="Phone Number"
+            placeholder="Enter your registered phone number"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="phone-pad"
+            error={error && method === 'phone' ? error : ''}
+          />
+        )}
 
         <Button
           title="Send OTP"
@@ -100,10 +155,13 @@ const ForgotPasswordScreen = () => {
         <Popup
           isVisible={popupVisible}
           title="OTP Sent"
-          message="An OTP has been sent to your email. Please check your inbox."
+          message={`An OTP has been sent to your ${method === 'email' ? 'email' : 'phone'}. Please check your ${method === 'email' ? 'inbox' : 'messages'}.`}
           onClose={() => {
             setPopupVisible(false);
-            navigation.navigate('ResetPassword', { email });
+            navigation.navigate('ResetPassword', { 
+              [method]: method === 'email' ? email : phone,
+              method 
+            });
           }}
         />
       </Content>

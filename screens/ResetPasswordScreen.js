@@ -61,9 +61,10 @@ const ResetPasswordScreen = () => {
       await axios.post(
         `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.RESET_PASSWORD}`,
         {
-          email: route.params?.email,
+          [route.params.method]: route.params[route.params.method],
           otp,
           newPassword,
+          method: route.params.method
         },
         { timeout: API_CONFIG.TIMEOUT }
       );
