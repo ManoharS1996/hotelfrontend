@@ -261,6 +261,9 @@ const HomeScreen = ({ navigation }) => {
           </View>
           <MaterialIcons name="keyboard-arrow-down" size={20} color="#333" />
         </View>
+        <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
+          <MaterialIcons name="shopping-cart" size={24} color="#333" style={{ marginRight: 15 }} />
+        </TouchableOpacity>
         <TouchableOpacity onPress={handleLogout}>
           <Image source={require('../assets/profile.jpg')} style={styles.profileImage} />
         </TouchableOpacity>

@@ -21,6 +21,7 @@ const OffersScreen = ({ navigation }) => {
       rating: 4.5,
       prepTime: '20-30 mins',
       isVeg: true,
+      category: 'normal'
     },
     {
       id: 2,
@@ -34,6 +35,7 @@ const OffersScreen = ({ navigation }) => {
       rating: 4.2,
       prepTime: '15-25 mins',
       isVeg: false,
+      category: 'normal'
     },
     {
       id: 3,
@@ -47,6 +49,7 @@ const OffersScreen = ({ navigation }) => {
       rating: 4.3,
       prepTime: '25-35 mins',
       isVeg: true,
+      category: 'normal'
     },
     {
       id: 4,
@@ -60,8 +63,8 @@ const OffersScreen = ({ navigation }) => {
       rating: 4.7,
       prepTime: '5-10 mins',
       isVeg: true,
+      category: 'normal'
     },
-    // Combo Offers
     {
       id: 5,
       name: 'Combo Meal',
@@ -74,6 +77,7 @@ const OffersScreen = ({ navigation }) => {
       rating: 4.8,
       prepTime: '40-50 mins',
       isVeg: true,
+      category: 'combo'
     },
     {
       id: 6,
@@ -87,8 +91,8 @@ const OffersScreen = ({ navigation }) => {
       rating: 4.6,
       prepTime: '30-40 mins',
       isVeg: false,
+      category: 'combo'
     },
-    // Weekend Special Offers
     {
       id: 7,
       name: 'Weekend Special Burger Set',
@@ -101,6 +105,7 @@ const OffersScreen = ({ navigation }) => {
       rating: 4.3,
       prepTime: '10-15 mins',
       isVeg: false,
+      category: 'weekend'
     },
     {
       id: 8,
@@ -114,62 +119,60 @@ const OffersScreen = ({ navigation }) => {
       rating: 4.7,
       prepTime: '20-30 mins',
       isVeg: true,
+      category: 'weekend'
     },
   ];
 
-  // Filter logic for offers
   const filteredOffers = offers.filter((offer) => {
-    if (activeFilter === 'All') return true; // Show all items if "All" is selected
-    
+    if (activeFilter === 'All') return true;
     if (activeFilter === '50% OFF' && offer.discount === '50% OFF') return true;
     if (activeFilter === 'Free Delivery' && offer.delivery === 'Free delivery') return true;
-    if (activeFilter === 'Combo' && offer.discount.includes('OFF')) return true;  // Combo logic
-    if (activeFilter === 'Weekend Special' && offer.discount.includes('OFF')) return true; // Weekend Special logic
-
+    if (activeFilter === 'Combo' && offer.category === 'combo') return true;
+    if (activeFilter === 'Weekend Special' && offer.category === 'weekend') return true;
     return false;
   });
 
   const renderOfferDetails = (offer) => {
     return (
       <View style={styles.detailsContainer}>
-        <TouchableOpacity 
-          style={styles.backButton} 
+        <TouchableOpacity
+          style={styles.backButton}
           onPress={() => setSelectedOffer(null)}
         >
           <MaterialIcons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        
+
         <Image source={offer.image} style={styles.detailImage} />
-        
+
         <View style={styles.detailContent}>
           <View style={styles.detailHeader}>
             <Text style={styles.detailName}>{offer.name}</Text>
             <View style={styles.vegIndicator}>
-              <View 
-                style={[styles.vegIcon, { backgroundColor: offer.isVeg ? '#4CAF50' : '#F44336' }]} 
+              <View
+                style={[styles.vegIcon, { backgroundColor: offer.isVeg ? '#4CAF50' : '#F44336' }]}
               />
               <Text style={styles.vegText}>
                 {offer.isVeg ? 'VEG' : 'NON-VEG'}
               </Text>
             </View>
           </View>
-          
+
           <View style={styles.priceContainer}>
             <Text style={styles.detailPrice}>{offer.price}</Text>
             <Text style={styles.originalPrice}>{offer.originalPrice}</Text>
             <Text style={styles.discount}>{offer.discount}</Text>
           </View>
-          
+
           <View style={styles.ratingContainer}>
             <MaterialIcons name="star" size={18} color="#FFD700" />
             <Text style={styles.ratingText}>{offer.rating}</Text>
             <Text style={styles.prepTime}>{offer.prepTime}</Text>
           </View>
-          
+
           <Text style={styles.deliveryText}>{offer.delivery}</Text>
-          
+
           <Text style={styles.description}>{offer.description}</Text>
-          
+
           <TouchableOpacity style={styles.addToCartButton}>
             <Text style={styles.addToCartText}>ADD TO CART</Text>
           </TouchableOpacity>
@@ -186,11 +189,11 @@ const OffersScreen = ({ navigation }) => {
             <MaterialIcons name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
           <Text style={styles.title}>Special Offers</Text>
-          <View style={{ width: 24 }} /> {/* For alignment */}
+          <View style={{ width: 24 }} />
         </View>
-        
-        <ScrollView 
-          horizontal 
+
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.filterContainer}
         >
@@ -206,25 +209,25 @@ const OffersScreen = ({ navigation }) => {
             </TouchableOpacity>
           ))}
         </ScrollView>
-        
+
         <ScrollView style={styles.offersContainer}>
           {filteredOffers.map(offer => (
-            <TouchableOpacity 
-              key={offer.id} 
+            <TouchableOpacity
+              key={offer.id}
               style={styles.offerCard}
               onPress={() => setSelectedOffer(offer)}
             >
               <Image source={offer.image} style={styles.offerImage} />
-              
+
               <View style={styles.offerContent}>
                 <Text style={styles.offerName}>{offer.name}</Text>
-                
+
                 <View style={styles.offerPriceContainer}>
                   <Text style={styles.offerPrice}>{offer.price}</Text>
                   <Text style={styles.offerOriginalPrice}>{offer.originalPrice}</Text>
                   <Text style={styles.offerDiscount}>{offer.discount}</Text>
                 </View>
-                
+
                 <View style={styles.offerMeta}>
                   <MaterialIcons name="star" size={16} color="#FFD700" />
                   <Text style={styles.offerRating}>{offer.rating}</Text>
@@ -350,6 +353,10 @@ const styles = StyleSheet.create({
     color: '#007bff',
     marginLeft: 10,
   },
+  vegIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   vegIcon: {
     width: 10,
     height: 10,
@@ -363,10 +370,14 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  backButton: {
+    marginBottom: 15,
+  },
   detailImage: {
     width: '100%',
     height: 250,
     resizeMode: 'cover',
+    borderRadius: 8,
   },
   detailContent: {
     padding: 15,
@@ -375,6 +386,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 10,
   },
   detailName: {
     fontSize: 22,
@@ -425,6 +437,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
     marginTop: 15,
+    lineHeight: 20,
   },
   addToCartButton: {
     backgroundColor: '#007bff',
