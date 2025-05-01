@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, ScrollView, TouchableOpacity, Text, StyleSheet, Image, Alert } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Text, StyleSheet, Image, Alert, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 const OffersScreen = ({ navigation }) => {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -23,6 +25,7 @@ const OffersScreen = ({ navigation }) => {
       isVeg: true,
       category: 'normal'
     },
+    // ... other offer items
     {
       id: 2,
       name: 'Organic Sweets',
@@ -156,7 +159,7 @@ const OffersScreen = ({ navigation }) => {
           <MaterialIcons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
 
-        <Image source={offer.image} style={styles.detailImage} />
+        <Image source={{uri:'https://www.bing.com/images/search?q=offers%20images&FORM=IQFRBA&id=4DA8792C195324FAEB614B6790A1D67871EAA80F'}} style={styles.detailImage} />
 
         <View style={styles.detailContent}>
           <View style={styles.detailHeader}>
@@ -213,6 +216,7 @@ const OffersScreen = ({ navigation }) => {
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.filterContainer}
+          contentContainerStyle={styles.filterContent}
         >
           {filters.map(filter => (
             <TouchableOpacity
@@ -227,14 +231,14 @@ const OffersScreen = ({ navigation }) => {
           ))}
         </ScrollView>
 
-        <ScrollView style={styles.offersContainer}>
+        <ScrollView style={styles.offersContainer} contentContainerStyle={styles.offersContent}>
           {filteredOffers.map(offer => (
             <TouchableOpacity
               key={offer.id}
               style={styles.offerCard}
               onPress={() => setSelectedOffer(offer)}
             >
-              <Image source={offer.image} style={styles.offerImage} />
+              <Image source={{uri:'https://static.vecteezy.com/system/resources/previews/000/267/866/original/vector-special-offer-creative-sale-banner-design.jpg'}} style={styles.offerImage} />
 
               <View style={styles.offerContent}>
                 <Text style={styles.offerName}>{offer.name}</Text>
@@ -287,22 +291,28 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     paddingVertical: 15,
-    paddingHorizontal: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    borderColor:'red',
+    borderWidth:2
+  },
+  filterContent: {
+    paddingHorizontal: 10,
   },
   filterButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 2,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
     backgroundColor: '#f4f4f4',
     borderRadius: 20,
     marginHorizontal: 5,
-    height: 25,
+    height: 35,
     alignItems: 'center',
     justifyContent: 'center',
+    borderColor:'red',
+    borderWidth:2
   },
   activeFilter: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#e74c3c',
   },
   activeFilterText: {
     color: '#fff',
@@ -312,92 +322,90 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   offersContainer: {
+    flex: 1,
+    borderColor:'red',
+    borderWidth:2
+  },
+  offersContent: {
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
   },
   offerCard: {
     backgroundColor: '#fff',
-    borderRadius: 8,
-    marginBottom: 10,
+    borderRadius: 10,
+    marginBottom: 15,
     overflow: 'hidden',
     elevation: 2,
+    flexDirection: 'row',
   },
   offerImage: {
-    width: '100%',
-    height: 180,
+    width: 100,
+    height: 100,
     resizeMode: 'cover',
   },
   offerContent: {
+    flex: 1,
     padding: 10,
+    justifyContent: 'center',
   },
   offerName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
+    marginBottom: 5,
     color: '#333',
   },
   offerPriceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    marginBottom: 5,
   },
   offerPrice: {
     fontSize: 16,
-    color: '#28a745',
-    marginRight: 10,
+    fontWeight: 'bold',
+    color: '#e74c3c',
+    marginRight: 5,
   },
   offerOriginalPrice: {
     fontSize: 14,
-    color: '#aaa',
+    color: '#999',
     textDecorationLine: 'line-through',
+    marginRight: 5,
   },
   offerDiscount: {
     fontSize: 14,
-    color: '#e60000',
-    marginLeft: 10,
+    color: '#27ae60',
   },
   offerMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
   },
   offerRating: {
-    fontSize: 14,
-    color: '#FFD700',
     marginLeft: 5,
+    marginRight: 10,
+    fontSize: 14,
+    color: '#333',
   },
   offerDelivery: {
     fontSize: 14,
-    color: '#007bff',
-    marginLeft: 10,
-  },
-  vegIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  vegIcon: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  vegText: {
-    fontSize: 12,
-    marginLeft: 5,
+    color: '#333',
   },
   detailsContainer: {
     flex: 1,
     padding: 20,
   },
   backButton: {
-    marginBottom: 15,
+    marginBottom: 10,
   },
   detailImage: {
-    width: '100%',
-    height: 250,
+    width: screenWidth - 40,
+    width:150,
+    height: 200,
+    borderRadius: 10,
     resizeMode: 'cover',
-    borderRadius: 8,
+    marginBottom: 15,
   },
   detailContent: {
-    padding: 15,
+    flex: 1,
   },
   detailHeader: {
     flexDirection: 'row',
@@ -410,64 +418,78 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
+  vegIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  vegIcon: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 5,
+  },
+  vegText: {
+    fontSize: 14,
+    color: '#333',
+  },
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 15,
+    marginBottom: 10,
   },
   detailPrice: {
-    fontSize: 18,
-    color: '#28a745',
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#e74c3c',
     marginRight: 10,
   },
   originalPrice: {
-    fontSize: 14,
+    fontSize: 16,
+    color: '#999',
     textDecorationLine: 'line-through',
-    color: '#aaa',
+    marginRight: 10,
   },
   discount: {
-    fontSize: 14,
-    color: '#e60000',
-    marginLeft: 10,
+    fontSize: 16,
+    color: '#27ae60',
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    marginBottom: 5,
   },
   ratingText: {
-    fontSize: 14,
-    color: '#FFD700',
     marginLeft: 5,
+    fontSize: 14,
+    color: '#333',
+    marginRight: 10,
   },
   prepTime: {
     fontSize: 14,
-    color: '#555',
-    marginLeft: 10,
+    color: '#333',
   },
   deliveryText: {
     fontSize: 14,
-    color: '#007bff',
-    marginTop: 10,
+    color: '#333',
+    marginBottom: 10,
   },
   description: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#555',
-    marginTop: 15,
-    lineHeight: 20,
+    marginBottom: 20,
   },
   addToCartButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#e74c3c',
     paddingVertical: 12,
-    borderRadius: 25,
-    marginTop: 20,
+    borderRadius: 8,
     alignItems: 'center',
   },
   addToCartText: {
-    fontSize: 16,
     color: '#fff',
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });
+
 
 export default OffersScreen;
