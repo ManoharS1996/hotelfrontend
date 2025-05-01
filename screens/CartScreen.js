@@ -248,7 +248,6 @@ const CartScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [cartItems, setCartItems] = useState([]);
-
   const [moreItems, setMoreItems] = useState([
     {
       id: 3,
@@ -283,14 +282,11 @@ const CartScreen = () => {
         quantity: 1,
         image: route.params.addedItem.image
       };
-      
       setCartItems(prevItems => {
         const existingItem = prevItems.find(item => item.id === newItem.id);
         if (existingItem) {
           return prevItems.map(item =>
-            item.id === newItem.id 
-              ? { ...item, quantity: item.quantity + 1 } 
-              : item
+            item.id === newItem.id ? { ...item, quantity: item.quantity + 1 } : item
           );
         }
         return [...prevItems, newItem];
@@ -331,14 +327,11 @@ const CartScreen = () => {
       quantity: 1,
       image: item.image
     };
-    
     setCartItems(prevItems => {
       const existingItem = prevItems.find(cartItem => cartItem.id === newItem.id);
       if (existingItem) {
         return prevItems.map(item =>
-          item.id === newItem.id 
-            ? { ...item, quantity: item.quantity + 1 } 
-            : item
+          item.id === newItem.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
       return [...prevItems, newItem];
@@ -380,67 +373,56 @@ const CartScreen = () => {
       </Header>
 
       <ScrollView>
-        <Title>My Cart ({cartItems.length})</Title>
-
-        {cartItems.map(item => (
+        {cartItems.map((item) => (
           <CartItemContainer key={item.id}>
             <ItemRow>
               <ItemImage source={item.image} />
               <ItemDetails>
                 <ItemName>{item.name}</ItemName>
                 <ItemDesc>{item.description}</ItemDesc>
-                <ItemPrice>₹{item.price}</ItemPrice>
+                <ItemPrice>₹{item.price * item.quantity}</ItemPrice>
+                <QuantityContainer>
+                  <QuantityButton onPress={() => decreaseQuantity(item.id)}>
+                    <Text>-</Text>
+                  </QuantityButton>
+                  <QuantityText>{item.quantity}</QuantityText>
+                  <QuantityButton onPress={() => increaseQuantity(item.id)}>
+                    <Text>+</Text>
+                  </QuantityButton>
+                </QuantityContainer>
+                <RemoveButton onPress={() => removeItem(item.id)}>
+                  <RemoveText>Remove</RemoveText>
+                </RemoveButton>
               </ItemDetails>
             </ItemRow>
-
-            <QuantityContainer>
-              <QuantityButton onPress={() => decreaseQuantity(item.id)}>
-                <MaterialIcons name="remove" size={20} color="#333" />
-              </QuantityButton>
-              <QuantityText>{item.quantity}</QuantityText>
-              <QuantityButton onPress={() => increaseQuantity(item.id)}>
-                <MaterialIcons name="add" size={20} color="#333" />
-              </QuantityButton>
-            </QuantityContainer>
-            <RemoveButton onPress={() => removeItem(item.id)}>
-              <RemoveText>Remove</RemoveText>
-            </RemoveButton>
           </CartItemContainer>
         ))}
 
-        {cartItems.length > 0 ? (
-          <>
-            <SummaryContainer>
-              <SummaryRow>
-                <SummaryText>Subtotal</SummaryText>
-                <SummaryAmount>₹{calculateSubtotal()}</SummaryAmount>
-              </SummaryRow>
-              <SummaryRow>
-                <SummaryText>Delivery Fee</SummaryText>
-                <SummaryAmount>₹{calculateSubtotal() > 500 ? 0 : 40}</SummaryAmount>
-              </SummaryRow>
-              <SummaryRow>
-                <SummaryText>Tax (5%)</SummaryText>
-                <SummaryAmount>₹{(calculateSubtotal() * 0.05).toFixed(2)}</SummaryAmount>
-              </SummaryRow>
-              <SummaryRow>
-                <TotalText>Total</TotalText>
-                <TotalAmount>₹{calculateTotal().toFixed(2)}</TotalAmount>
-              </SummaryRow>
-            </SummaryContainer>
+        <SummaryContainer>
+          <SummaryRow>
+            <SummaryText>Subtotal</SummaryText>
+            <SummaryAmount>₹{calculateSubtotal()}</SummaryAmount>
+          </SummaryRow>
+          <SummaryRow>
+            <SummaryText>Delivery Fee</SummaryText>
+            <SummaryAmount>₹{calculateSubtotal() > 500 ? 0 : 40}</SummaryAmount>
+          </SummaryRow>
+          <SummaryRow>
+            <SummaryText>Tax (5%)</SummaryText>
+            <SummaryAmount>₹{(calculateSubtotal() * 0.05).toFixed(2)}</SummaryAmount>
+          </SummaryRow>
+          <SummaryRow>
+            <TotalText>Total</TotalText>
+            <TotalAmount>₹{calculateTotal().toFixed(2)}</TotalAmount>
+          </SummaryRow>
+        </SummaryContainer>
 
-            <CheckoutButton onPress={() => navigation.navigate('Checkout')}>
-              <CheckoutText>Proceed to Checkout</CheckoutText>
-            </CheckoutButton>
-          </>
-        ) : (
-          <View style={{ padding: 20, alignItems: 'center' }}>
-            <Text style={{ fontSize: 16 }}>Your cart is empty</Text>
-          </View>
-        )}
+        <CheckoutButton onPress={() => alert('Proceed to checkout')}>
+          <CheckoutText>Checkout</CheckoutText>
+        </CheckoutButton>
 
         <MoreItemsContainer>
-          <MoreItemsTitle>More Items You Might Like</MoreItemsTitle>
+          <MoreItemsTitle>More items</MoreItemsTitle>
           {moreItems.map(item => (
             <MoreItemCard key={item.id}>
               <MoreItemImage source={item.image} />
@@ -449,7 +431,7 @@ const CartScreen = () => {
                 <MoreItemPrice>₹{item.price}</MoreItemPrice>
               </MoreItemDetails>
               <AddButton onPress={() => addToCart(item)}>
-                <MaterialIcons name="add-shopping-cart" size={20} color="#fff" />
+                <Text style={{ color: '#fff' }}>+</Text>
               </AddButton>
             </MoreItemCard>
           ))}

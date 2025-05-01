@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, ScrollView, TouchableOpacity, Text, StyleSheet, Image, Alert, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const OffersScreen = ({ navigation }) => {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -25,7 +25,6 @@ const OffersScreen = ({ navigation }) => {
       isVeg: true,
       category: 'normal'
     },
-    // ... other offer items
     {
       id: 2,
       name: 'Organic Sweets',
@@ -40,6 +39,7 @@ const OffersScreen = ({ navigation }) => {
       isVeg: false,
       category: 'normal'
     },
+    // ... (rest of your offer items remain the same)
     {
       id: 3,
       name: 'Sweets',
@@ -159,44 +159,46 @@ const OffersScreen = ({ navigation }) => {
           <MaterialIcons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
 
-        <Image source={{uri:'https://www.bing.com/images/search?q=offers%20images&FORM=IQFRBA&id=4DA8792C195324FAEB614B6790A1D67871EAA80F'}} style={styles.detailImage} />
+        <ScrollView contentContainerStyle={styles.detailScrollContent}>
+          <Image source={offer.image} style={styles.detailImage} />
 
-        <View style={styles.detailContent}>
-          <View style={styles.detailHeader}>
-            <Text style={styles.detailName}>{offer.name}</Text>
-            <View style={styles.vegIndicator}>
-              <View
-                style={[styles.vegIcon, { backgroundColor: offer.isVeg ? '#4CAF50' : '#F44336' }]}
-              />
-              <Text style={styles.vegText}>
-                {offer.isVeg ? 'VEG' : 'NON-VEG'}
-              </Text>
+          <View style={styles.detailContent}>
+            <View style={styles.detailHeader}>
+              <Text style={styles.detailName} numberOfLines={2}>{offer.name}</Text>
+              <View style={styles.vegIndicator}>
+                <View
+                  style={[styles.vegIcon, { backgroundColor: offer.isVeg ? '#4CAF50' : '#F44336' }]}
+                />
+                <Text style={styles.vegText}>
+                  {offer.isVeg ? 'VEG' : 'NON-VEG'}
+                </Text>
+              </View>
             </View>
+
+            <View style={styles.priceContainer}>
+              <Text style={styles.detailPrice}>{offer.price}</Text>
+              <Text style={styles.originalPrice}>{offer.originalPrice}</Text>
+              <Text style={styles.discount}>{offer.discount}</Text>
+            </View>
+
+            <View style={styles.ratingContainer}>
+              <MaterialIcons name="star" size={18} color="#FFD700" />
+              <Text style={styles.ratingText}>{offer.rating}</Text>
+              <Text style={styles.prepTime}>{offer.prepTime}</Text>
+            </View>
+
+            <Text style={styles.deliveryText}>{offer.delivery}</Text>
+
+            <Text style={styles.description}>{offer.description}</Text>
+
+            <TouchableOpacity 
+              style={styles.addToCartButton}
+              onPress={() => handleAddToCart(offer)}
+            >
+              <Text style={styles.addToCartText}>ADD TO CART</Text>
+            </TouchableOpacity>
           </View>
-
-          <View style={styles.priceContainer}>
-            <Text style={styles.detailPrice}>{offer.price}</Text>
-            <Text style={styles.originalPrice}>{offer.originalPrice}</Text>
-            <Text style={styles.discount}>{offer.discount}</Text>
-          </View>
-
-          <View style={styles.ratingContainer}>
-            <MaterialIcons name="star" size={18} color="#FFD700" />
-            <Text style={styles.ratingText}>{offer.rating}</Text>
-            <Text style={styles.prepTime}>{offer.prepTime}</Text>
-          </View>
-
-          <Text style={styles.deliveryText}>{offer.delivery}</Text>
-
-          <Text style={styles.description}>{offer.description}</Text>
-
-          <TouchableOpacity 
-            style={styles.addToCartButton}
-            onPress={() => handleAddToCart(offer)}
-          >
-            <Text style={styles.addToCartText}>ADD TO CART</Text>
-          </TouchableOpacity>
-        </View>
+        </ScrollView>
       </View>
     );
   };
@@ -212,36 +214,44 @@ const OffersScreen = ({ navigation }) => {
           <View style={{ width: 24 }} />
         </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterContainer}
-          contentContainerStyle={styles.filterContent}
-        >
-          {filters.map(filter => (
-            <TouchableOpacity
-              key={filter}
-              style={[styles.filterButton, activeFilter === filter && styles.activeFilter]}
-              onPress={() => setActiveFilter(filter)}
-            >
-              <Text style={[styles.filterText, activeFilter === filter && styles.activeFilterText]}>
-                {filter}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <View style={styles.filterWrapper}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterContent}
+          >
+            {filters.map(filter => (
+              <TouchableOpacity
+                key={filter}
+                style={[styles.filterButton, activeFilter === filter && styles.activeFilter]}
+                onPress={() => setActiveFilter(filter)}
+              >
+                <Text 
+                  style={[styles.filterText, activeFilter === filter && styles.activeFilterText]}
+                  numberOfLines={1}
+                >
+                  {filter}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
-        <ScrollView style={styles.offersContainer} contentContainerStyle={styles.offersContent}>
+        <ScrollView 
+          style={styles.offersContainer} 
+          contentContainerStyle={styles.offersContent}
+          showsVerticalScrollIndicator={false}
+        >
           {filteredOffers.map(offer => (
             <TouchableOpacity
               key={offer.id}
               style={styles.offerCard}
               onPress={() => setSelectedOffer(offer)}
             >
-              <Image source={{uri:'https://static.vecteezy.com/system/resources/previews/000/267/866/original/vector-special-offer-creative-sale-banner-design.jpg'}} style={styles.offerImage} />
+              <Image source={offer.image} style={styles.offerImage} />
 
               <View style={styles.offerContent}>
-                <Text style={styles.offerName}>{offer.name}</Text>
+                <Text style={styles.offerName} numberOfLines={1}>{offer.name}</Text>
 
                 <View style={styles.offerPriceContainer}>
                   <Text style={styles.offerPrice}>{offer.price}</Text>
@@ -250,9 +260,11 @@ const OffersScreen = ({ navigation }) => {
                 </View>
 
                 <View style={styles.offerMeta}>
-                  <MaterialIcons name="star" size={16} color="#FFD700" />
-                  <Text style={styles.offerRating}>{offer.rating}</Text>
-                  <Text style={styles.offerDelivery}>{offer.delivery}</Text>
+                  <View style={styles.ratingWrapper}>
+                    <MaterialIcons name="star" size={16} color="#FFD700" />
+                    <Text style={styles.offerRating}>{offer.rating}</Text>
+                  </View>
+                  <Text style={styles.offerDelivery} numberOfLines={1}>{offer.delivery}</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -285,204 +297,229 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
+    flex: 1,
+    textAlign: 'center',
+    marginHorizontal: 10,
   },
-  filterContainer: {
-    paddingVertical: 15,
+  filterWrapper: {
+    height: 60,
+    paddingVertical: 10,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    borderColor:'red',
-    borderWidth:2
   },
   filterContent: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
+    alignItems: 'center',
   },
   filterButton: {
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    backgroundColor: '#f4f4f4',
+    height: 40,
+    marginRight: 10,
+    paddingHorizontal: 20,
     borderRadius: 20,
-    marginHorizontal: 5,
-    height: 35,
-    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
     justifyContent: 'center',
-    borderColor:'red',
-    borderWidth:2
+    alignItems: 'center',
+    minWidth: 90,
   },
   activeFilter: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: '#4CAF50',
+  },
+  filterText: {
+    color: '#333',
+    fontSize: 16,
+    fontWeight: '600',
   },
   activeFilterText: {
     color: '#fff',
-  },
-  filterText: {
-    fontSize: 14,
-    color: '#333',
+    fontWeight: '600',
   },
   offersContainer: {
     flex: 1,
-    borderColor:'red',
-    borderWidth:2
+    paddingHorizontal: 15,
   },
   offersContent: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingBottom: 20,
   },
   offerCard: {
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
     overflow: 'hidden',
-    elevation: 2,
-    flexDirection: 'row',
   },
   offerImage: {
-    width: 100,
-    height: 100,
+    width: '100%',
+    height: 150,
     resizeMode: 'cover',
   },
   offerContent: {
-    flex: 1,
-    padding: 10,
-    justifyContent: 'center',
+    padding: 15,
   },
   offerName: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 5,
+    marginBottom: 8,
     color: '#333',
   },
   offerPriceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 8,
   },
   offerPrice: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#e74c3c',
-    marginRight: 5,
+    color: '#4CAF50',
+    marginRight: 8,
   },
   offerOriginalPrice: {
     fontSize: 14,
-    color: '#999',
     textDecorationLine: 'line-through',
-    marginRight: 5,
+    color: '#777',
+    marginRight: 8,
   },
   offerDiscount: {
     fontSize: 14,
-    color: '#27ae60',
+    color: '#f44336',
+    fontWeight: '500',
   },
   offerMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  ratingWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   offerRating: {
     marginLeft: 5,
-    marginRight: 10,
     fontSize: 14,
     color: '#333',
   },
   offerDelivery: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: 13,
+    color: '#777',
+    maxWidth: '50%',
   },
   detailsContainer: {
     flex: 1,
-    padding: 20,
+    backgroundColor: '#fff',
+  },
+  detailScrollContent: {
+    paddingBottom: 30,
   },
   backButton: {
-    marginBottom: 10,
+    padding: 15,
+    paddingBottom: 10,
   },
   detailImage: {
-    width: screenWidth - 40,
-    width:150,
-    height: 200,
-    borderRadius: 10,
+    width: '100%',
+    height: 250,
     resizeMode: 'cover',
-    marginBottom: 15,
   },
   detailContent: {
-    flex: 1,
+    padding: 20,
   },
   detailHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+    alignItems: 'flex-start',
+    marginBottom: 15,
   },
   detailName: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
+    flex: 1,
+    marginRight: 10,
   },
   vegIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
   },
   vegIcon: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     marginRight: 5,
   },
   vegText: {
-    fontSize: 14,
-    color: '#333',
+    fontSize: 12,
+    fontWeight: '500',
   },
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
   },
   detailPrice: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#e74c3c',
+    color: '#4CAF50',
     marginRight: 10,
   },
   originalPrice: {
     fontSize: 16,
-    color: '#999',
     textDecorationLine: 'line-through',
+    color: '#777',
     marginRight: 10,
   },
   discount: {
     fontSize: 16,
-    color: '#27ae60',
+    color: '#f44336',
+    fontWeight: '500',
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 15,
   },
   ratingText: {
+    fontSize: 16,
     marginLeft: 5,
-    fontSize: 14,
     color: '#333',
-    marginRight: 10,
   },
   prepTime: {
     fontSize: 14,
-    color: '#333',
+    color: '#777',
+    marginLeft: 15,
   },
   deliveryText: {
     fontSize: 14,
-    color: '#333',
-    marginBottom: 10,
+    color: '#4CAF50',
+    marginBottom: 15,
+    fontWeight: '500',
   },
   description: {
     fontSize: 16,
     color: '#555',
-    marginBottom: 20,
+    lineHeight: 24,
+    marginBottom: 25,
   },
   addToCartButton: {
-    backgroundColor: '#e74c3c',
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: '#4CAF50',
+    paddingVertical: 15,
+    borderRadius: 25,
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#4CAF50',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   addToCartText: {
     color: '#fff',
@@ -490,6 +527,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
 
 export default OffersScreen;
