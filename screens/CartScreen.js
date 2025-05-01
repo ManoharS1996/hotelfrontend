@@ -349,6 +349,16 @@ const CartScreen = () => {
     return subtotal + deliveryFee + tax;
   };
 
+  const handleCheckout = () => {
+    navigation.navigate('Checkout', {
+      cartItems,
+      subtotal: calculateSubtotal(),
+      deliveryFee: calculateSubtotal() > 500 ? 0 : 40,
+      tax: calculateSubtotal() * 0.05,
+      total: calculateTotal()
+    });
+  };
+
   return (
     <Container>
       <Header>
@@ -417,7 +427,7 @@ const CartScreen = () => {
           </SummaryRow>
         </SummaryContainer>
 
-        <CheckoutButton onPress={() => alert('Proceed to checkout')}>
+        <CheckoutButton onPress={handleCheckout}>
           <CheckoutText>Checkout</CheckoutText>
         </CheckoutButton>
 
