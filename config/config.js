@@ -1,7 +1,7 @@
 // apiConfig.js
 
 const API_CONFIG = {
-  BASE_URL: 'http://192.168.29.87:5000/api', // ✅ Use your correct API URL
+  BASE_URL: 'http://192.168.0.109:5000/api', // ✅ Use your correct API URL
   TIMEOUT: 10000, // 10 seconds
   HEADERS: {
     'Content-Type': 'application/json',
