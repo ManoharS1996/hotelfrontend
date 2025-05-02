@@ -409,7 +409,7 @@ const CheckoutScreen = () => {
           onPress={() => setSelectedPayment('cash')}
         >
           <Icon source={getImageSource('cash')} />
-          <PaymentText>Cash on Delivery</PaymentText>
+          <PaymentText>Cash Payment</PaymentText>
         </PaymentOption>
       </PaymentSection>
 

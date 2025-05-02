@@ -24,13 +24,11 @@ const HomeScreen = ({ navigation }) => {
         const email = await AsyncStorage.getItem('userEmail');
         if (email) setUserEmail(email);
 
-        // Load cart items from storage
         const savedCart = await AsyncStorage.getItem('cartItems');
         if (savedCart) setCartItems(JSON.parse(savedCart));
         
         await fetchLocation();
         
-        // Start animations
         Animated.loop(
           Animated.sequence([
             Animated.timing(blinkAnim, {
@@ -46,7 +44,6 @@ const HomeScreen = ({ navigation }) => {
           ])
         ).start();
         
-        // Start offer carousel
         const interval = setInterval(() => {
           if (scrollViewRef.current) {
             currentOfferIndex.current = (currentOfferIndex.current + 1) % offers.length;
@@ -66,6 +63,14 @@ const HomeScreen = ({ navigation }) => {
 
     init();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', async () => {
+      const savedCart = await AsyncStorage.getItem('cartItems');
+      if (savedCart) setCartItems(JSON.parse(savedCart));
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const setDefaultLocation = () => {
     setCity('Vijayawada');
@@ -145,7 +150,6 @@ const HomeScreen = ({ navigation }) => {
 
   const reverseGeocode = async (lat, lng) => {
     try {
-      // Note: Replace 'YOUR_GOOGLE_API_KEY' with your actual Google Maps API key
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_GOOGLE_API_KEY`
       );
@@ -155,13 +159,11 @@ const HomeScreen = ({ navigation }) => {
         const address = data.results[0];
         const addressComponents = address.address_components;
         
-        // Extract city
         const cityComponent = addressComponents.find(component =>
           component.types.includes('locality')
         );
         setCity(cityComponent ? cityComponent.long_name : 'Unknown City');
         
-        // Extract area/street - try several possible component types
         const areaComponent = addressComponents.find(component =>
           component.types.includes('sublocality') || 
           component.types.includes('neighborhood') ||
@@ -171,7 +173,6 @@ const HomeScreen = ({ navigation }) => {
         if (areaComponent) {
           setArea(areaComponent.long_name);
         } else {
-          // Fallback to the first formatted address line if no specific area found
           const formattedAddress = address.formatted_address.split(',')[0];
           setArea(formattedAddress || cityComponent?.long_name || 'Nearby Area');
         }
@@ -200,11 +201,9 @@ const HomeScreen = ({ navigation }) => {
       let updatedCart;
 
       if (existingItemIndex >= 0) {
-        // Item already in cart, increase quantity
         updatedCart = [...cartItems];
         updatedCart[existingItemIndex].quantity += 1;
       } else {
-        // Add new item to cart
         updatedCart = [...cartItems, { ...item, quantity: 1 }];
       }
       
@@ -216,7 +215,10 @@ const HomeScreen = ({ navigation }) => {
         `${item.name} has been added to your cart`,
         [
           { text: 'OK', onPress: () => console.log('OK Pressed') },
-          { text: 'View Cart', onPress: () => navigation.navigate('Cart') }
+          { 
+            text: 'View Cart', 
+            onPress: () => navigation.navigate('Cart', { cartItems: updatedCart }) 
+          }
         ]
       );
     } catch (error) {
@@ -350,7 +352,6 @@ const HomeScreen = ({ navigation }) => {
     outputRange: [1, 0.3]
   });
 
-  // Filter items based on search query and selected category
   const filteredItems = popularItems.filter(item => {
     const matchesSearch = searchQuery === '' || 
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -368,7 +369,6 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.locationContainer}>
           <MaterialIcons name="location-pin" size={24} color="#e74c3c" />
@@ -395,7 +395,6 @@ const HomeScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Search */}
       <View style={styles.searchContainer}>
         <FontAwesome name="search" size={20} color="#999" style={styles.searchIcon} />
         <TextInput
@@ -407,12 +406,10 @@ const HomeScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Body */}
       <ScrollView 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Special Offers */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Special Offers in {area}</Text>
@@ -446,7 +443,6 @@ const HomeScreen = ({ navigation }) => {
           </ScrollView>
         </View>
 
-        {/* Categories */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Categories</Text>
           <ScrollView 
@@ -479,7 +475,6 @@ const HomeScreen = ({ navigation }) => {
           </ScrollView>
         </View>
 
-        {/* Restaurant Info */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Featured Restaurant in {area}</Text>
           <TouchableOpacity 
@@ -499,7 +494,6 @@ const HomeScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Popular Items */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
