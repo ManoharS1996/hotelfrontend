@@ -185,92 +185,12 @@ const CheckoutText = styled.Text`
   font-weight: bold;
 `;
 
-const MoreItemsContainer = styled.View`
-  margin-top: 10px;
-`;
-
-const MoreItemsTitle = styled.Text`
-  font-size: 18px;
-  font-weight: bold;
-  margin-left: 15px;
-  margin-bottom: 10px;
-`;
-
-const MoreItemCard = styled.View`
-  background-color: #fff;
-  border-radius: 10px;
-  padding: 15px;
-  margin: 5px 10px;
-  flex-direction: row;
-  ${Platform.OS === 'android' ? 'elevation: 1;' : `
-    shadow-color: #000;
-    shadow-opacity: 0.2;
-    shadow-radius: 2px;
-    shadow-offset: 0px 2px;
-  `}
-`;
-
-const MoreItemImage = styled.Image`
-  width: 60px;
-  height: 60px;
-  border-radius: 10px;
-`;
-
-const MoreItemDetails = styled.View`
-  flex: 1;
-  margin-left: 15px;
-  justify-content: center;
-`;
-
-const MoreItemName = styled.Text`
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 2px;
-`;
-
-const MoreItemPrice = styled.Text`
-  font-size: 14px;
-  color: #e74c3c;
-`;
-
-const AddButton = styled.TouchableOpacity`
-  background-color: #e74c3c;
-  width: 30px;
-  height: 30px;
-  border-radius: 15px;
-  justify-content: center;
-  align-items: center;
-`;
-
 const CartScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [cartItems, setCartItems] = useState([]);
-  const [moreItems, setMoreItems] = useState([
-    {
-      id: 3,
-      name: 'Pancakes',
-      description: 'Fluffy pancakes with maple syrup',
-      price: 199,
-      image: require('../assets/pancake.jpg')
-    },
-    {
-      id: 4,
-      name: 'Chocolate Shake',
-      description: 'Rich chocolate milkshake with whipped cream',
-      price: 129,
-      image: require('../assets/shake.jpg')
-    },
-    {
-      id: 5,
-      name: 'Veg Burger',
-      description: 'Delicious veg burger with fresh veggies',
-      price: 99,
-      image: require('../assets/burger.jpg')
-    }
-  ]);
 
   useEffect(() => {
     if (route.params?.addedItem) {
@@ -280,7 +200,7 @@ const CartScreen = () => {
         description: route.params.addedItem.description,
         price: parseInt(route.params.addedItem.price.replace('₹', '')),
         quantity: 1,
-        image: route.params.addedItem.image
+        image: route.params.addedItem.image,
       };
       setCartItems(prevItems => {
         const existingItem = prevItems.find(item => item.id === newItem.id);
@@ -302,40 +222,20 @@ const CartScreen = () => {
     }, 1500);
   };
 
-  const increaseQuantity = (id) => {
+  const increaseQuantity = id => {
     setCartItems(cartItems.map(item =>
       item.id === id ? { ...item, quantity: item.quantity + 1 } : item
     ));
   };
 
-  const decreaseQuantity = (id) => {
+  const decreaseQuantity = id => {
     setCartItems(cartItems.map(item =>
       item.id === id && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
     ));
   };
 
-  const removeItem = (id) => {
+  const removeItem = id => {
     setCartItems(cartItems.filter(item => item.id !== id));
-  };
-
-  const addToCart = (item) => {
-    const newItem = {
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      price: item.price,
-      quantity: 1,
-      image: item.image
-    };
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(cartItem => cartItem.id === newItem.id);
-      if (existingItem) {
-        return prevItems.map(item =>
-          item.id === newItem.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prevItems, newItem];
-    });
   };
 
   const calculateSubtotal = () => {
@@ -355,7 +255,7 @@ const CartScreen = () => {
       subtotal: calculateSubtotal(),
       deliveryFee: calculateSubtotal() > 500 ? 0 : 40,
       tax: calculateSubtotal() * 0.05,
-      total: calculateTotal()
+      total: calculateTotal(),
     });
   };
 
@@ -383,7 +283,7 @@ const CartScreen = () => {
       </Header>
 
       <ScrollView>
-        {cartItems.map((item) => (
+        {cartItems.map(item => (
           <CartItemContainer key={item.id}>
             <ItemRow>
               <ItemImage source={item.image} />
@@ -428,24 +328,8 @@ const CartScreen = () => {
         </SummaryContainer>
 
         <CheckoutButton onPress={handleCheckout}>
-          <CheckoutText>Checkout</CheckoutText>
+          <CheckoutText>Proceed to Checkout</CheckoutText>
         </CheckoutButton>
-
-        <MoreItemsContainer>
-          <MoreItemsTitle>More items</MoreItemsTitle>
-          {moreItems.map(item => (
-            <MoreItemCard key={item.id}>
-              <MoreItemImage source={item.image} />
-              <MoreItemDetails>
-                <MoreItemName>{item.name}</MoreItemName>
-                <MoreItemPrice>₹{item.price}</MoreItemPrice>
-              </MoreItemDetails>
-              <AddButton onPress={() => addToCart(item)}>
-                <Text style={{ color: '#fff' }}>+</Text>
-              </AddButton>
-            </MoreItemCard>
-          ))}
-        </MoreItemsContainer>
       </ScrollView>
     </Container>
   );
