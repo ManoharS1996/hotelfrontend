@@ -353,13 +353,13 @@ const HomeScreen = ({ navigation }) => {
   });
 
   const filteredItems = popularItems.filter(item => {
-    const matchesSearch = searchQuery === '' || 
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      item.description.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchesSearch = searchQuery === '' ||
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.category.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesCategory = !selectedCategory || item.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -384,7 +384,9 @@ const HomeScreen = ({ navigation }) => {
               <MaterialIcons name="shopping-cart" size={24} color="#333" style={styles.cartIcon} />
               {cartItems.length > 0 && (
                 <View style={styles.cartBadge}>
-                  <Text style={styles.cartBadgeText}>{cartItems.reduce((total, item) => total + item.quantity, 0)}</Text>
+                  <Text style={styles.cartBadgeText}>
+                    {cartItems.reduce((total, item) => total + item.quantity, 0)}
+                  </Text>
                 </View>
               )}
             </View>
@@ -514,7 +516,11 @@ const HomeScreen = ({ navigation }) => {
               contentContainerStyle={styles.itemsScrollContent}
             >
               {filteredItems.map((item) => (
-                <View key={item.id} style={styles.itemCard}>
+                <TouchableOpacity 
+                  key={item.id} 
+                  style={styles.itemCard}
+                  activeOpacity={0.8}
+                >
                   <Image source={item.image} style={styles.itemImage} />
                   <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
                   <View style={styles.itemBottom}>
@@ -527,10 +533,11 @@ const HomeScreen = ({ navigation }) => {
                   <TouchableOpacity 
                     style={styles.addButton}
                     onPress={() => addToCart(item)}
+                    activeOpacity={0.7}
                   >
                     <Text style={styles.addButtonText}>ADD</Text>
                   </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
               ))}
             </ScrollView>
           )}
@@ -555,6 +562,8 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: '#fff',
     paddingTop: 50,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
   locationContainer: {
     flexDirection: 'row',
@@ -607,6 +616,8 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -618,6 +629,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     height: 50,
     elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   searchIcon: {
     marginRight: 10,
@@ -658,6 +673,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
     position: 'relative',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   newBadge: {
     position: 'absolute',
@@ -709,6 +729,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 100,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
   },
   activeCategory: {
     backgroundColor: '#e74c3c',
@@ -728,6 +753,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     overflow: 'hidden',
     elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   restaurantImage: {
     width: '100%',
@@ -750,6 +779,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#FFD700',
     marginRight: 15,
+    fontWeight: 'bold',
   },
   restaurantDelivery: {
     fontSize: 14,
@@ -767,22 +797,24 @@ const styles = StyleSheet.create({
   itemsScrollContent: {
     paddingHorizontal: 15,
   },
-  searchResultsContainer: {
-    paddingHorizontal: 15,
-  },
   noResultsText: {
     textAlign: 'center',
     color: '#555',
     marginTop: 20,
     paddingHorizontal: 15,
+    fontSize: 16,
   },
   itemCard: {
-    width: 150,
+    width: 160,
     backgroundColor: '#fff',
     borderRadius: 10,
     marginRight: 15,
     padding: 10,
     elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
   },
   itemImage: {
     width: '100%',
@@ -818,9 +850,10 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#e74c3c',
-    paddingVertical: 5,
+    paddingVertical: 8,
     borderRadius: 5,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   addButtonText: {
     color: 'white',
