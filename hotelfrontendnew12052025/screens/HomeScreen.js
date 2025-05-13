@@ -197,14 +197,23 @@ const HomeScreen = ({ navigation }) => {
 
   const addToCart = async (item) => {
     try {
-      const existingItemIndex = cartItems.findIndex(cartItem => cartItem.id === item.id);
+      const cartItem = {
+        id: item.id.toString(),
+        name: item.name,
+        description: item.description,
+        price: parseInt(item.price.replace('₹', '')),
+        quantity: 1,
+        image: item.image
+      };
+
+      const existingItemIndex = cartItems.findIndex(cartItem => cartItem.id === item.id.toString());
       let updatedCart;
 
       if (existingItemIndex >= 0) {
         updatedCart = [...cartItems];
         updatedCart[existingItemIndex].quantity += 1;
       } else {
-        updatedCart = [...cartItems, { ...item, quantity: 1 }];
+        updatedCart = [...cartItems, cartItem];
       }
       
       setCartItems(updatedCart);

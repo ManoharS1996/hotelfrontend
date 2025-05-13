@@ -1,66 +1,65 @@
+// [Full working updated CartScreen.js with 'Continue Shopping' section]
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Text, Platform } from 'react-native';
+import { View, ScrollView, Text, Platform, KeyboardAvoidingView, FlatList } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import styled from 'styled-components/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-// Styled Components
-const Container = styled.View`
+const Container = styled.SafeAreaView`
   flex: 1;
-  background-color: #f5f5f5;
+  background-color: #f9f9f9;
 `;
 
 const Header = styled.View`
   flex-direction: row;
   align-items: center;
-  padding: 15px;
-  background-color: #fff;
+  padding: 12px 15px;
+  background-color: #ffffff;
   border-bottom-width: 1px;
-  border-bottom-color: #eee;
+  border-bottom-color: #ddd;
 `;
 
 const BackButton = styled.TouchableOpacity`
-  margin-right: 15px;
+  margin-right: 12px;
 `;
 
 const SearchContainer = styled.View`
+  flex: 1;
   flex-direction: row;
   align-items: center;
-  background-color: #f0f0f0;
-  border-radius: 25px;
-  padding: 8px 15px;
-  flex: 1;
+  background-color: #e8e8e8;
+  border-radius: 30px;
+  padding: 6px 12px;
 `;
 
 const SearchInput = styled.TextInput`
   flex: 1;
-  height: 40px;
-  padding-left: 10px;
-  font-size: 16px;
+  font-size: 15px;
+  padding: 8px 12px;
   color: #333;
 `;
 
 const VoiceButton = styled.TouchableOpacity`
-  margin-left: 10px;
+  margin-left: 8px;
 `;
 
 const Title = styled.Text`
-  font-size: 22px;
-  font-weight: bold;
-  margin: 20px 15px 10px;
-  color: #333;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 16px 20px 8px;
+  color: #222;
 `;
 
 const CartItemContainer = styled.View`
   background-color: #fff;
-  border-radius: 12px;
-  padding: 15px;
+  border-radius: 10px;
+  padding: 12px;
   margin: 8px 15px;
   ${Platform.select({
     ios: `
       shadow-color: #000;
-      shadow-opacity: 0.05;
-      shadow-radius: 5px;
+      shadow-opacity: 0.06;
+      shadow-radius: 4px;
       shadow-offset: 0px 2px;
     `,
     android: `
@@ -74,76 +73,77 @@ const ItemRow = styled.View`
 `;
 
 const ItemImage = styled.Image`
-  width: 90px;
-  height: 90px;
+  width: 80px;
+  height: 80px;
   border-radius: 8px;
+  background-color: #eee;
 `;
 
 const ItemDetails = styled.View`
   flex: 1;
-  margin-left: 15px;
+  margin-left: 12px;
   justify-content: space-between;
 `;
 
 const ItemName = styled.Text`
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: bold;
   color: #333;
   margin-bottom: 4px;
 `;
 
 const ItemDesc = styled.Text`
   font-size: 13px;
-  color: #777;
-  margin-bottom: 8px;
+  color: #666;
+  margin-bottom: 6px;
 `;
 
 const ItemPrice = styled.Text`
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: bold;
   color: #e74c3c;
 `;
 
 const QuantityContainer = styled.View`
   flex-direction: row;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 8px;
 `;
 
 const QuantityButton = styled.TouchableOpacity`
-  width: 30px;
-  height: 30px;
-  border-radius: 15px;
-  background-color: #f0f0f0;
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  background-color: #f2f2f2;
   justify-content: center;
   align-items: center;
 `;
 
 const QuantityText = styled.Text`
-  font-size: 16px;
-  margin: 0 12px;
-  font-weight: 500;
+  font-size: 14px;
+  margin: 0 10px;
+  font-weight: 600;
 `;
 
 const RemoveButton = styled.TouchableOpacity`
   align-self: flex-start;
-  padding: 6px 12px;
-  border-radius: 6px;
-  background-color: #f8e0e0;
   margin-top: 8px;
+  padding: 4px 10px;
+  background-color: #fdeeee;
+  border-radius: 5px;
 `;
 
 const RemoveText = styled.Text`
-  color: #e74c3c;
-  font-size: 13px;
+  font-size: 12px;
+  color: #c0392b;
   font-weight: 500;
 `;
 
 const SummaryContainer = styled.View`
   background-color: #fff;
-  padding: 20px;
+  padding: 18px;
   margin: 15px;
-  border-radius: 12px;
+  border-radius: 10px;
   ${Platform.select({
     ios: `
       shadow-color: #000;
@@ -160,53 +160,42 @@ const SummaryContainer = styled.View`
 const SummaryRow = styled.View`
   flex-direction: row;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 `;
 
 const SummaryText = styled.Text`
-  font-size: 15px;
+  font-size: 14px;
   color: #555;
 `;
 
 const SummaryAmount = styled.Text`
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
 `;
 
 const TotalText = styled.Text`
-  font-size: 17px;
-  font-weight: 600;
-  color: #333;
+  font-size: 16px;
+  font-weight: bold;
+  color: #222;
 `;
 
 const TotalAmount = styled.Text`
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: bold;
   color: #e74c3c;
 `;
 
 const CheckoutButton = styled.TouchableOpacity`
   background-color: #e74c3c;
-  padding: 16px;
-  border-radius: 10px;
+  padding: 15px;
   margin: 15px;
+  border-radius: 10px;
   align-items: center;
-  ${Platform.select({
-    ios: `
-      shadow-color: #e74c3c;
-      shadow-opacity: 0.3;
-      shadow-radius: 5px;
-      shadow-offset: 0px 2px;
-    `,
-    android: `
-      elevation: 3;
-    `,
-  })}
 `;
 
 const CheckoutText = styled.Text`
   color: #fff;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
 `;
 
@@ -214,16 +203,57 @@ const EmptyCartContainer = styled.View`
   flex: 1;
   justify-content: center;
   align-items: center;
-  padding: 40px;
+  padding: 30px;
 `;
 
 const EmptyCartText = styled.Text`
-  font-size: 18px;
-  color: #777;
-  text-align: center;
-  margin-top: 20px;
+  font-size: 17px;
+  color: #888;
+  margin-top: 15px;
 `;
 
+// Continue Shopping Section
+const ContinueTitle = styled.Text`
+  font-size: 18px;
+  font-weight: 600;
+  margin: 15px;
+`;
+
+const SuggestionCard = styled.View`
+  width: 140px;
+  background-color: #fff;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  align-items: center;
+  justify-content: center;
+  ${Platform.select({
+    ios: `
+      shadow-color: #000;
+      shadow-opacity: 0.04;
+      shadow-radius: 3px;
+      shadow-offset: 0px 2px;
+    `,
+    android: `
+      elevation: 2;
+    `,
+  })}
+`;
+
+const AddButton = styled.TouchableOpacity`
+  background-color: #27ae60;
+  margin-top: 6px;
+  padding: 6px 12px;
+  border-radius: 5px;
+`;
+
+const AddText = styled.Text`
+  color: #fff;
+  font-size: 13px;
+  font-weight: bold;
+`;
+
+// Main CartScreen Component
 const CartScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
@@ -231,58 +261,76 @@ const CartScreen = () => {
   const [isListening, setIsListening] = useState(false);
   const [cartItems, setCartItems] = useState([]);
 
+  const continueItems = [
+    {
+      id: '2001',
+      name: 'Organic Honey',
+      description: 'Pure and natural sweetener',
+      price: 180,
+      image: { uri: 'https://via.placeholder.com/80x80.png?text=Honey' },
+    },
+    {
+      id: '2002',
+      name: 'Dry Figs',
+      description: 'Healthy and tasty dry fruits',
+      price: 220,
+      image: { uri: 'https://via.placeholder.com/80x80.png?text=Figs' },
+    },
+    {
+      id: '2003',
+      name: 'Herbal Green Tea',
+      description: 'Boost metabolism and immunity',
+      price: 150,
+      image: { uri: 'https://via.placeholder.com/80x80.png?text=Green+Tea' },
+    },
+  ];
+
   useEffect(() => {
-    if (route.params?.addedItem) {
-      const newItem = {
-        id: route.params.addedItem.id,
-        name: route.params.addedItem.name,
-        description: route.params.addedItem.description,
-        price: parseInt(route.params.addedItem.price.replace('₹', '')),
+    const preloaded = [
+      {
+        id: '1001',
+        name: 'Organic Brown Rice',
+        description: 'High-fiber whole grain',
+        price: 120,
         quantity: 1,
-        image: route.params.addedItem.image,
-      };
-      setCartItems(prevItems => {
-        const existing = prevItems.find(i => i.id === newItem.id);
-        if (existing) {
-          return prevItems.map(item =>
-            item.id === newItem.id ? { ...item, quantity: item.quantity + 1 } : item
-          );
-        }
-        return [...prevItems, newItem];
-      });
-    }
-  }, [route.params?.addedItem]);
+        image: { uri: 'https://via.placeholder.com/80x80.png?text=Brown+Rice' },
+      },
+      {
+        id: '1002',
+        name: 'Almond Energy Bar',
+        description: 'Tasty and healthy snack',
+        price: 80,
+        quantity: 1,
+        image: { uri: 'https://via.placeholder.com/80x80.png?text=Energy+Bar' },
+      },
+    ];
+    setCartItems(prev => [...prev, ...preloaded]);
+  }, []);
+
+  const addToCart = (item) => {
+    setCartItems(prev => {
+      const exists = prev.find(i => i.id === item.id);
+      if (exists) {
+        return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
+      }
+      return [...prev, { ...item, quantity: 1 }];
+    });
+  };
 
   const handleVoiceSearch = () => {
     setIsListening(true);
     setTimeout(() => {
       setIsListening(false);
-      setSearchQuery('organic millet');
-    }, 1500);
+      setSearchQuery('organic honey');
+    }, 1200);
   };
 
-  const increaseQuantity = (id) => {
-    setCartItems(prev =>
-      prev.map(item => item.id === id ? { ...item, quantity: item.quantity + 1 } : item)
-    );
-  };
+  const filteredItems = cartItems.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const decreaseQuantity = (id) => {
-    setCartItems(prev =>
-      prev.map(item =>
-        item.id === id && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
-      )
-    );
-  };
-
-  const removeItem = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
-  };
-
-  const calculateSubtotal = () => {
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  };
-
+  const calculateSubtotal = () => filteredItems.reduce((total, item) => total + item.price * item.quantity, 0);
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
     const delivery = subtotal > 500 ? 0 : 40;
@@ -290,108 +338,101 @@ const CartScreen = () => {
     return subtotal + delivery + tax;
   };
 
-  const handleCheckout = () => {
-    const subtotal = calculateSubtotal();
-    const deliveryFee = subtotal > 500 ? 0 : 40;
-    const tax = subtotal * 0.05;
-    const total = calculateTotal();
-
-    navigation.navigate('Checkout', {
-      cartItems,
-      subtotal,
-      deliveryFee,
-      tax,
-      total
-    });
-  };
-
   return (
-    <Container>
-      <Header>
-        <BackButton onPress={() => navigation.goBack()}>
-          <MaterialIcons name="arrow-back" size={24} color="#333" />
-        </BackButton>
-        <SearchContainer>
-          <FontAwesome name="search" size={18} color="#999" />
-          <SearchInput
-            placeholder="Search items..."
-            placeholderTextColor="#999"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          <VoiceButton onPress={handleVoiceSearch}>
-            <MaterialIcons
-              name={isListening ? 'mic' : 'mic-none'}
-              size={24}
-              color={isListening ? '#e74c3c' : '#999'}
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <Container>
+        <Header>
+          <BackButton onPress={() => navigation.goBack()}>
+            <MaterialIcons name="arrow-back" size={24} color="#333" />
+          </BackButton>
+          <SearchContainer>
+            <FontAwesome name="search" size={18} color="#999" />
+            <SearchInput
+              placeholder="Search in cart..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              returnKeyType="search"
+              placeholderTextColor="#999"
             />
-          </VoiceButton>
-        </SearchContainer>
-      </Header>
+            <VoiceButton onPress={handleVoiceSearch}>
+              <MaterialIcons name={isListening ? 'mic' : 'mic-none'} size={22} color={isListening ? '#e74c3c' : '#999'} />
+            </VoiceButton>
+          </SearchContainer>
+        </Header>
 
-      <ScrollView>
-        <Title>My Cart ({cartItems.length})</Title>
+        <ScrollView>
+          <Title>My Cart ({filteredItems.length})</Title>
 
-        {cartItems.length === 0 ? (
-          <EmptyCartContainer>
-            <MaterialIcons name="remove-shopping-cart" size={60} color="#ccc" />
-            <EmptyCartText>Your cart is empty</EmptyCartText>
-          </EmptyCartContainer>
-        ) : (
-          <>
-            {cartItems.map(item => (
-              <CartItemContainer key={item.id}>
-                <ItemRow>
-                  <ItemImage source={item.image} />
-                  <ItemDetails>
-                    <View>
-                      <ItemName>{item.name}</ItemName>
-                      <ItemDesc>{item.description}</ItemDesc>
-                      <ItemPrice>₹{item.price * item.quantity}</ItemPrice>
-                    </View>
-                    <View>
-                      <QuantityContainer>
-                        <QuantityButton onPress={() => decreaseQuantity(item.id)}>
-                          <Text>-</Text>
-                        </QuantityButton>
-                        <QuantityText>{item.quantity}</QuantityText>
-                        <QuantityButton onPress={() => increaseQuantity(item.id)}>
-                          <Text>+</Text>
-                        </QuantityButton>
-                      </QuantityContainer>
-                      <RemoveButton onPress={() => removeItem(item.id)}>
-                        <RemoveText>Remove</RemoveText>
-                      </RemoveButton>
-                    </View>
-                  </ItemDetails>
-                </ItemRow>
-              </CartItemContainer>
-            ))}
-            <SummaryContainer>
-              <SummaryRow>
-                <SummaryText>Subtotal</SummaryText>
-                <SummaryAmount>₹{calculateSubtotal().toFixed(2)}</SummaryAmount>
-              </SummaryRow>
-              <SummaryRow>
-                <SummaryText>Delivery</SummaryText>
-                <SummaryAmount>₹{calculateSubtotal() > 500 ? 0 : 40}</SummaryAmount>
-              </SummaryRow>
-              <SummaryRow>
-                <SummaryText>Tax (5%)</SummaryText>
-                <SummaryAmount>₹{(calculateSubtotal() * 0.05).toFixed(2)}</SummaryAmount>
-              </SummaryRow>
-              <SummaryRow>
-                <TotalText>Total</TotalText>
-                <TotalAmount>₹{calculateTotal().toFixed(2)}</TotalAmount>
-              </SummaryRow>
-            </SummaryContainer>
-            <CheckoutButton onPress={handleCheckout}>
-              <CheckoutText>Proceed to Checkout</CheckoutText>
-            </CheckoutButton>
-          </>
-        )}
-      </ScrollView>
-    </Container>
+          {filteredItems.length === 0 ? (
+            <EmptyCartContainer>
+              <MaterialIcons name="remove-shopping-cart" size={60} color="#ccc" />
+              <EmptyCartText>Your cart is empty</EmptyCartText>
+            </EmptyCartContainer>
+          ) : (
+            <>
+              {filteredItems.map(item => (
+                <CartItemContainer key={item.id}>
+                  <ItemRow>
+                    <ItemImage source={item.image} />
+                    <ItemDetails>
+                      <View>
+                        <ItemName>{item.name}</ItemName>
+                        <ItemDesc>{item.description}</ItemDesc>
+                        <ItemPrice>₹{item.price * item.quantity}</ItemPrice>
+                      </View>
+                      <View>
+                        <QuantityContainer>
+                          <QuantityButton onPress={() => addToCart({ ...item, quantity: 1 })}>
+                            <Text>+</Text>
+                          </QuantityButton>
+                          <QuantityText>{item.quantity}</QuantityText>
+                          <QuantityButton onPress={() => setCartItems(prev => prev.map(i => i.id === item.id && i.quantity > 1 ? { ...i, quantity: i.quantity - 1 } : i))}>
+                            <Text>-</Text>
+                          </QuantityButton>
+                        </QuantityContainer>
+                        <RemoveButton onPress={() => setCartItems(prev => prev.filter(i => i.id !== item.id))}>
+                          <RemoveText>Remove</RemoveText>
+                        </RemoveButton>
+                      </View>
+                    </ItemDetails>
+                  </ItemRow>
+                </CartItemContainer>
+              ))}
+
+              <SummaryContainer>
+                <SummaryRow><SummaryText>Subtotal</SummaryText><SummaryAmount>₹{calculateSubtotal().toFixed(2)}</SummaryAmount></SummaryRow>
+                <SummaryRow><SummaryText>Delivery</SummaryText><SummaryAmount>₹{calculateSubtotal() > 500 ? 0 : 40}</SummaryAmount></SummaryRow>
+                <SummaryRow><SummaryText>Tax (5%)</SummaryText><SummaryAmount>₹{(calculateSubtotal() * 0.05).toFixed(2)}</SummaryAmount></SummaryRow>
+                <SummaryRow><TotalText>Total</TotalText><TotalAmount>₹{calculateTotal().toFixed(2)}</TotalAmount></SummaryRow>
+              </SummaryContainer>
+
+              <CheckoutButton onPress={() => navigation.navigate('Checkout')}>
+                <CheckoutText>Proceed to Checkout</CheckoutText>
+              </CheckoutButton>
+
+              {/* Continue Shopping */}
+              <ContinueTitle>Continue Shopping</ContinueTitle>
+              <FlatList
+                horizontal
+                data={continueItems}
+                keyExtractor={item => item.id}
+                renderItem={({ item }) => (
+                  <SuggestionCard>
+                    <ItemImage source={item.image} style={{ width: 60, height: 60 }} />
+                    <ItemName style={{ fontSize: 14, textAlign: 'center' }}>{item.name}</ItemName>
+                    <ItemPrice style={{ fontSize: 14 }}>₹{item.price}</ItemPrice>
+                    <AddButton onPress={() => addToCart(item)}>
+                      <AddText>Add</AddText>
+                    </AddButton>
+                  </SuggestionCard>
+                )}
+                showsHorizontalScrollIndicator={false}
+              />
+            </>
+          )}
+        </ScrollView>
+      </Container>
+    </KeyboardAvoidingView>
   );
 };
 
