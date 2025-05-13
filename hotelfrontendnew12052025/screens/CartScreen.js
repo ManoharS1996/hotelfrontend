@@ -1,4 +1,3 @@
-// [Full working updated CartScreen.js with 'Continue Shopping' section]
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Text, Platform, KeyboardAvoidingView, FlatList } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
@@ -212,7 +211,6 @@ const EmptyCartText = styled.Text`
   margin-top: 15px;
 `;
 
-// Continue Shopping Section
 const ContinueTitle = styled.Text`
   font-size: 18px;
   font-weight: 600;
@@ -253,13 +251,12 @@ const AddText = styled.Text`
   font-weight: bold;
 `;
 
-// Main CartScreen Component
 const CartScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(route.params?.cartItems || []);
 
   const continueItems = [
     {
@@ -267,54 +264,44 @@ const CartScreen = () => {
       name: 'Organic Honey',
       description: 'Pure and natural sweetener',
       price: 180,
-      image: { uri: 'https://via.placeholder.com/80x80.png?text=Honey' },
+      image: { uri: 'https://5.imimg.com/data5/SELLER/Default/2024/11/465007441/KU/JM/BC/30736415/pure-honey-500x500.webp' },
     },
     {
       id: '2002',
       name: 'Dry Figs',
       description: 'Healthy and tasty dry fruits',
       price: 220,
-      image: { uri: 'https://via.placeholder.com/80x80.png?text=Figs' },
+      image: { uri: 'https://www.thakkarbros.com/wp-content/uploads/2021/08/IMG_9878-copy-1.jpg' },
     },
     {
       id: '2003',
       name: 'Herbal Green Tea',
       description: 'Boost metabolism and immunity',
       price: 150,
-      image: { uri: 'https://via.placeholder.com/80x80.png?text=Green+Tea' },
+      image: { uri: 'https://m.media-amazon.com/images/I/61THlQMso1L._AC_UF1000,1000_QL80_.jpg' },
     },
   ];
 
   useEffect(() => {
-    const preloaded = [
-      {
-        id: '1001',
-        name: 'Organic Brown Rice',
-        description: 'High-fiber whole grain',
-        price: 120,
-        quantity: 1,
-        image: { uri: 'https://via.placeholder.com/80x80.png?text=Brown+Rice' },
-      },
-      {
-        id: '1002',
-        name: 'Almond Energy Bar',
-        description: 'Tasty and healthy snack',
-        price: 80,
-        quantity: 1,
-        image: { uri: 'https://via.placeholder.com/80x80.png?text=Energy+Bar' },
-      },
-    ];
-    setCartItems(prev => [...prev, ...preloaded]);
-  }, []);
+    if (route.params?.cartItems) {
+      setCartItems(route.params.cartItems);
+    }
+  }, [route.params?.cartItems]);
 
-  const addToCart = (item) => {
-    setCartItems(prev => {
-      const exists = prev.find(i => i.id === item.id);
-      if (exists) {
-        return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
-      }
-      return [...prev, { ...item, quantity: 1 }];
-    });
+  const addToCart = async (item) => {
+    const existingItem = cartItems.find(i => i.id === item.id);
+    let updatedCart;
+    
+    if (existingItem) {
+      updatedCart = cartItems.map(i => 
+        i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+      );
+    } else {
+      updatedCart = [...cartItems, { ...item, quantity: 1 }];
+    }
+    
+    setCartItems(updatedCart);
+    await AsyncStorage.setItem('cartItems', JSON.stringify(updatedCart));
   };
 
   const handleVoiceSearch = () => {
@@ -386,11 +373,22 @@ const CartScreen = () => {
                             <Text>+</Text>
                           </QuantityButton>
                           <QuantityText>{item.quantity}</QuantityText>
-                          <QuantityButton onPress={() => setCartItems(prev => prev.map(i => i.id === item.id && i.quantity > 1 ? { ...i, quantity: i.quantity - 1 } : i))}>
+                          <QuantityButton onPress={() => {
+                            const updatedItems = cartItems.map(i => 
+                              i.id === item.id && i.quantity > 1 ? 
+                              { ...i, quantity: i.quantity - 1 } : i
+                            );
+                            setCartItems(updatedItems);
+                            AsyncStorage.setItem('cartItems', JSON.stringify(updatedItems));
+                          }}>
                             <Text>-</Text>
                           </QuantityButton>
                         </QuantityContainer>
-                        <RemoveButton onPress={() => setCartItems(prev => prev.filter(i => i.id !== item.id))}>
+                        <RemoveButton onPress={async () => {
+                          const updatedItems = cartItems.filter(i => i.id !== item.id);
+                          setCartItems(updatedItems);
+                          await AsyncStorage.setItem('cartItems', JSON.stringify(updatedItems));
+                        }}>
                           <RemoveText>Remove</RemoveText>
                         </RemoveButton>
                       </View>
@@ -410,7 +408,6 @@ const CartScreen = () => {
                 <CheckoutText>Proceed to Checkout</CheckoutText>
               </CheckoutButton>
 
-              {/* Continue Shopping */}
               <ContinueTitle>Continue Shopping</ContinueTitle>
               <FlatList
                 horizontal

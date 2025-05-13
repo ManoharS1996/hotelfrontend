@@ -287,7 +287,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Organic Millet',
       price: '₹299',
       rating: 4.5,
-      image: require('../assets/millets.jpg'),
+      image: { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYNtWSFgCS-BHAYp6_GYoZtJIs2PP088PQIQ&s' },
       description: 'Healthy organic millet with mixed vegetables',
       category: 'Millets'
     },
@@ -296,7 +296,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Rava Dosa',
       price: '₹149',
       rating: 4.2,
-      image: require('../assets/dosa.jpg'),
+      image: { uri: 'https://www.cookwithmanali.com/wp-content/uploads/2020/05/Rava-Dosa-500x500.jpg' },
       description: 'Crispy South Indian rava dosa with chutney',
       category: 'Breakfast'
     },
@@ -305,7 +305,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Pancakes',
       price: '₹199',
       rating: 4.7,
-      image: require('../assets/pancake.jpg'),
+      image: { uri: 'https://www.indianhealthyrecipes.com/wp-content/uploads/2021/07/pancake-recipe-500x500.jpg' },
       description: 'Fluffy pancakes with maple syrup',
       category: 'Breakfast'
     },
@@ -314,7 +314,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Chocolate Shake',
       price: '₹129',
       rating: 4.3,
-      image: require('../assets/shake.jpg'),
+      image: { uri: 'https://www.vegrecipesofindia.com/wp-content/uploads/2021/05/chocolate-milkshake-1-500x500.jpg' },
       description: 'Creamy chocolate milkshake',
       category: 'Drinks'
     },
@@ -323,7 +323,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Gulab Jamun',
       price: '₹99',
       rating: 4.8,
-      image: require('../assets/gulabjamun.jpg'),
+      image: { uri: 'https://www.vegrecipesofindia.com/wp-content/uploads/2020/01/gulab-jamun-recipe-500x500.jpg' },
       description: 'Sweet fried milk balls in sugar syrup',
       category: 'Sweets'
     },
@@ -332,7 +332,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Pasta',
       price: '₹179',
       rating: 4.4,
-      image: require('../assets/pasta.jpg'),
+      image: { uri: 'https://www.indianhealthyrecipes.com/wp-content/uploads/2022/02/white-sauce-pasta-recipe-500x500.jpg' },
       description: 'Italian pasta in creamy white sauce',
       category: 'Dinner'
     },
@@ -341,7 +341,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Samosa',
       price: '₹49',
       rating: 4.1,
-      image: require('../assets/samosa.jpg'),
+      image: { uri: 'https://www.indianhealthyrecipes.com/wp-content/uploads/2019/11/samosa-recipe-500x500.jpg' },
       description: 'Crispy fried pastry with spicy potato filling',
       category: 'Snacks'
     },
