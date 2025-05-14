@@ -33,12 +33,12 @@ const HomeScreen = ({ navigation }) => {
           Animated.sequence([
             Animated.timing(blinkAnim, {
               toValue: 1,
-              duration: 1000,
+              duration: 30000,
               useNativeDriver: true,
             }),
             Animated.timing(blinkAnim, {
               toValue: 0,
-              duration: 1000,
+              duration: 30000,
               useNativeDriver: true,
             }),
           ])
@@ -287,7 +287,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Organic Millet',
       price: '₹299',
       rating: 4.5,
-      image: { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYNtWSFgCS-BHAYp6_GYoZtJIs2PP088PQIQ&s' },
+      image: { uri: 'https://m.media-amazon.com/images/I/61aB4dzOGiL._AC_UF1000,1000_QL80_.jpg' },
       description: 'Healthy organic millet with mixed vegetables',
       category: 'Millets'
     },
@@ -296,7 +296,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Rava Dosa',
       price: '₹149',
       rating: 4.2,
-      image: { uri: 'https://www.cookwithmanali.com/wp-content/uploads/2020/05/Rava-Dosa-500x500.jpg' },
+      image: { uri: 'https://www.indianhealthyrecipes.com/wp-content/uploads/2022/05/rava-dosa-recipe.jpg' },
       description: 'Crispy South Indian rava dosa with chutney',
       category: 'Breakfast'
     },
@@ -305,7 +305,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Pancakes',
       price: '₹199',
       rating: 4.7,
-      image: { uri: 'https://www.indianhealthyrecipes.com/wp-content/uploads/2021/07/pancake-recipe-500x500.jpg' },
+      image: { uri: 'https://www.marthastewart.com/thmb/Vgb9cQSlegZz5fcoSbkkqyHPmHY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/338185-basic-pancakes-09-00b18f8418fd4e52bb2050173d083d04.jpg' },
       description: 'Fluffy pancakes with maple syrup',
       category: 'Breakfast'
     },
@@ -314,7 +314,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Chocolate Shake',
       price: '₹129',
       rating: 4.3,
-      image: { uri: 'https://www.vegrecipesofindia.com/wp-content/uploads/2021/05/chocolate-milkshake-1-500x500.jpg' },
+      image: { uri: 'https://iambaker.net/wp-content/uploads/2024/06/Chocolate-Shake-4.jpg' },
       description: 'Creamy chocolate milkshake',
       category: 'Drinks'
     },
@@ -323,7 +323,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Gulab Jamun',
       price: '₹99',
       rating: 4.8,
-      image: { uri: 'https://www.vegrecipesofindia.com/wp-content/uploads/2020/01/gulab-jamun-recipe-500x500.jpg' },
+      image: { uri: 'https://theartisticcook.com/wp-content/uploads/2024/10/Gulab-Jamun-with-Milk-Powder.jpg' },
       description: 'Sweet fried milk balls in sugar syrup',
       category: 'Sweets'
     },
@@ -332,7 +332,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Pasta',
       price: '₹179',
       rating: 4.4,
-      image: { uri: 'https://www.indianhealthyrecipes.com/wp-content/uploads/2022/02/white-sauce-pasta-recipe-500x500.jpg' },
+      image: { uri: 'https://www.nestleprofessional.in/sites/default/files/2021-08/Vegetable-Penne-Pasta.jpg' },
       description: 'Italian pasta in creamy white sauce',
       category: 'Dinner'
     },
@@ -341,7 +341,7 @@ const HomeScreen = ({ navigation }) => {
       name: 'Samosa',
       price: '₹49',
       rating: 4.1,
-      image: { uri: 'https://www.indianhealthyrecipes.com/wp-content/uploads/2019/11/samosa-recipe-500x500.jpg' },
+      image: { uri: 'https://vegecravings.com/wp-content/uploads/2017/03/Aloo-Samosa-Recipe-Step-By-Step-Instructions.jpg' },
       description: 'Crispy fried pastry with spicy potato filling',
       category: 'Snacks'
     },

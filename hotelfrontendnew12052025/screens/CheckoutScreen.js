@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
-import { View, Animated, Easing } from 'react-native';
+import React, { useState, useEffect } from 'react'; // Added useEffect
+import { View, Animated, Easing, Alert, Platform } from 'react-native'; // Added Alert, Platform
 import styled from 'styled-components/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { FontAwesome } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Added AsyncStorage
 
-// Styled Components
+
+// Styled Components (Keep your existing styled components as they are)
 const Container = styled.ScrollView.attrs({
   keyboardShouldPersistTaps: 'handled',
+  contentContainerStyle: { flexGrow: 1 } // Ensure scrollview can expand
 })`
   flex: 1;
   background-color: #ffffff;
@@ -33,6 +36,17 @@ const OrderSummary = styled.View`
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 20px;
+  ${Platform.select({
+    ios: `
+      shadow-color: #000;
+      shadow-opacity: 0.08;
+      shadow-radius: 5px;
+      shadow-offset: 0px 3px;
+    `,
+    android: `
+      elevation: 3;
+    `,
+  })}
 `;
 
 const SummaryTitle = styled.Text`
@@ -56,6 +70,7 @@ const SummaryText = styled.Text`
 const SummaryAmount = styled.Text`
   font-size: 16px;
   font-weight: bold;
+  color: #333;
 `;
 
 const TotalRow = styled.View`
@@ -70,6 +85,7 @@ const TotalRow = styled.View`
 const TotalText = styled.Text`
   font-size: 18px;
   font-weight: bold;
+  color: #2c3e50;
 `;
 
 const TotalAmount = styled.Text`
@@ -90,20 +106,22 @@ const SectionTitle = styled.Text`
 `;
 
 const PaymentOption = styled.TouchableOpacity`
-  background-color: ${props => props.selected ? '#d4edda' : props.disabled ? '#f5f5f5' : '#ecf0f1'};
+  background-color: ${props => props.selected ? '#d4edda' : props.disabled ? '#f0f0f0' : '#ecf0f1'};
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 15px;
   flex-direction: row;
   align-items: center;
-  border-width: ${props => props.selected ? '1px' : '0'};
-  border-color: #28a745;
+  border-width: ${props => props.selected ? '1.5px' : '0'};
+  border-color: ${props => props.selected ? '#28a745' : 'transparent'};
+  opacity: ${props => props.disabled ? 0.6 : 1};
 `;
 
 const PaymentText = styled.Text`
   font-size: 18px;
   margin-left: 15px;
-  color: ${props => props.disabled ? '#aaa' : '#2c3e50'};
+  color: ${props => props.disabled ? '#aaa' : props.selected ? '#155724' : '#2c3e50'};
+  font-weight: ${props => props.selected ? 'bold' : 'normal'};
 `;
 
 const Icon = styled.Image`
@@ -119,6 +137,17 @@ const Button = styled.TouchableOpacity`
   align-items: center;
   margin-top: 30px;
   opacity: ${props => props.disabled ? 0.6 : 1};
+  ${Platform.select({
+    ios: `
+      shadow-color: #000;
+      shadow-opacity: 0.1;
+      shadow-radius: 5px;
+      shadow-offset: 0px 3px;
+    `,
+    android: `
+      elevation: 2;
+    `,
+  })}
 `;
 
 const ButtonText = styled.Text`
@@ -157,6 +186,17 @@ const OrderDetailsCard = styled.View`
   border-radius: 10px;
   width: 100%;
   margin-top: 20px;
+   ${Platform.select({
+    ios: `
+      shadow-color: #000;
+      shadow-opacity: 0.08;
+      shadow-radius: 5px;
+      shadow-offset: 0px 3px;
+    `,
+    android: `
+      elevation: 3;
+    `,
+  })}
 `;
 
 const OrderDetailRow = styled.View`
@@ -183,6 +223,17 @@ const ContinueButton = styled.TouchableOpacity`
   align-items: center;
   margin-top: 30px;
   width: 100%;
+  ${Platform.select({
+    ios: `
+      shadow-color: #000;
+      shadow-opacity: 0.1;
+      shadow-radius: 5px;
+      shadow-offset: 0px 3px;
+    `,
+    android: `
+      elevation: 2;
+    `,
+  })}
 `;
 
 const ContinueButtonText = styled.Text`
@@ -195,72 +246,108 @@ const CheckoutScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
 
-  const { cartItems, subtotal, deliveryFee, tax, total } = route.params || {
-    cartItems: [],
-    subtotal: 0,
-    deliveryFee: 0,
-    tax: 0,
-    total: 0
-  };
+  // Robust default values and parameter extraction
+  const params = route.params || {};
+  const cartItems = params.cartItems || [];
+  const subtotal = typeof params.subtotal === 'number' ? params.subtotal : 0;
+  const deliveryFee = typeof params.deliveryFee === 'number' ? params.deliveryFee : 0;
+  const tax = typeof params.tax === 'number' ? params.tax : 0;
+  const total = typeof params.total === 'number' ? params.total : 0;
 
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
-  const [scaleValue] = useState(new Animated.Value(0));
+  const [scaleValue] = useState(new Animated.Value(0.5)); // Start smaller for better animation
   const [rotationValue] = useState(new Animated.Value(0));
 
+  // Placeholder for asset loading
+  // In a real app, you'd use require directly or a more sophisticated asset management
   const paymentIcons = {
-    online: require('../assets/online.png'),
-    netbanking: require('../assets/netbanking.png'),
+    online: require('../assets/online.png'), // Make sure these paths are correct
+    netbanking: require('../assets/netbanking.png'), // and the assets exist
     qrcode: require('../assets/qrcode.png'),
     cash: require('../assets/cash.png'),
   };
 
-  const getImageSource = (icon) => paymentIcons[icon] ?? paymentIcons['cash'];
+  const getImageSource = (iconName) => {
+    // Basic error handling for icons
+    if (paymentIcons[iconName]) {
+      return paymentIcons[iconName];
+    }
+    // Return a default or handle missing icon
+    console.warn(`Icon for ${iconName} not found, using default.`);
+    return paymentIcons['cash']; // Or some placeholder
+  };
+
 
   const generateOrderDetails = () => {
     const now = new Date();
     return {
-      orderId: `ORD${Math.floor(Math.random() * 1000000)}`,
-      date: now.toLocaleDateString(),
-      time: now.toLocaleTimeString(),
+      orderId: `ORD${Math.floor(Math.random() * 1000000) + Date.now().toString().slice(-4)}`, // More unique ID
+      date: now.toLocaleDateString('en-GB'), // Or your preferred locale
+      time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }), // Or your preferred locale
       paymentMethod: selectedPayment,
-      total: total.toFixed(2)
+      total: total.toFixed(2) // Use the total received from params
     };
   };
 
-  const handleConfirmOrder = () => {
-    if (selectedPayment !== 'cash') return;
+ const handleConfirmOrder = async () => {
+    if (selectedPayment !== 'cash') {
+      Alert.alert("Payment Method", "Only Cash on Delivery is currently available.");
+      return;
+    }
+    if (cartItems.length === 0) {
+        Alert.alert("Empty Order", "Cannot place an order with no items.");
+        return;
+    }
 
     const details = generateOrderDetails();
     setOrderDetails(details);
 
     Animated.sequence([
-      Animated.timing(scaleValue, { toValue: 1.2, duration: 300, useNativeDriver: true }),
-      Animated.timing(scaleValue, { toValue: 1, duration: 200, useNativeDriver: true }),
-      Animated.timing(scaleValue, { toValue: 1.05, duration: 100, useNativeDriver: true }),
-      Animated.timing(scaleValue, { toValue: 1, duration: 100, useNativeDriver: true })
+        Animated.spring(scaleValue, { toValue: 1.2, friction: 3, tension: 40, useNativeDriver: true }),
+        Animated.spring(scaleValue, { toValue: 1, friction: 4, tension: 30, useNativeDriver: true }),
     ]).start();
 
     Animated.timing(rotationValue, {
       toValue: 1,
-      duration: 800,
-      easing: Easing.elastic(1),
+      duration: 700, // Slightly faster
+      easing: Easing.elastic(1.5), // More pronounced elastic effect
       useNativeDriver: true
-    }).start();
+    }).start(() => {
+        // Optionally clear cart after successful order
+        AsyncStorage.removeItem('cartItems')
+            .then(() => console.log("Cart cleared after order confirmation."))
+            .catch(err => console.error("Error clearing cart:", err));
+    });
 
     setOrderConfirmed(true);
   };
 
+
   const handleContinueShopping = () => {
-    navigation.navigate('Home');
+    // Navigate to Home and reset the stack if applicable
+    // For example, if Home is the root of a tab navigator or stack
+    navigation.navigate('Home', { screen: 'HomeScreen', params: { orderJustPlaced: true } }); // Example: Passing a param back
+    // Or, if you want to reset the entire navigation stack to Home:
+    // navigation.reset({
+    //   index: 0,
+    //   routes: [{ name: 'Home' }],
+    // });
   };
 
-  if (orderConfirmed) {
+  if (orderConfirmed && orderDetails) { // Ensure orderDetails is not null
     const rotate = rotationValue.interpolate({
       inputRange: [0, 1],
       outputRange: ['0deg', '360deg']
     });
+
+    const paymentMethodDisplay = {
+        cash: 'Cash on Delivery',
+        online: 'Online Payment',
+        netbanking: 'Net Banking',
+        qrcode: 'QR Code'
+    };
 
     return (
       <ConfirmationContainer>
@@ -268,15 +355,18 @@ const CheckoutScreen = () => {
           <FontAwesome name="check-circle" size={100} color="#28a745" />
         </Animated.View>
         <ConfirmationTitle>Order Confirmed!</ConfirmationTitle>
-        <ConfirmationSubtitle>Thank you for your purchase</ConfirmationSubtitle>
+        <ConfirmationSubtitle>Thank you for your purchase. Your order details are below.</ConfirmationSubtitle>
 
         <OrderDetailsCard>
           <OrderDetailRow><OrderDetailLabel>Order ID:</OrderDetailLabel><OrderDetailValue>{orderDetails.orderId}</OrderDetailValue></OrderDetailRow>
           <OrderDetailRow><OrderDetailLabel>Date:</OrderDetailLabel><OrderDetailValue>{orderDetails.date}</OrderDetailValue></OrderDetailRow>
           <OrderDetailRow><OrderDetailLabel>Time:</OrderDetailLabel><OrderDetailValue>{orderDetails.time}</OrderDetailValue></OrderDetailRow>
-          <OrderDetailRow><OrderDetailLabel>Payment Method:</OrderDetailLabel><OrderDetailValue>
-            {selectedPayment === 'cash' ? 'Cash on Delivery' : selectedPayment === 'online' ? 'Online Payment' : selectedPayment === 'netbanking' ? 'Net Banking' : 'QR Code'}
-          </OrderDetailValue></OrderDetailRow>
+          <OrderDetailRow>
+            <OrderDetailLabel>Payment Method:</OrderDetailLabel>
+            <OrderDetailValue>
+              {paymentMethodDisplay[orderDetails.paymentMethod] || 'N/A'}
+            </OrderDetailValue>
+          </OrderDetailRow>
           <OrderDetailRow><OrderDetailLabel>Total Amount:</OrderDetailLabel><OrderDetailValue>₹{orderDetails.total}</OrderDetailValue></OrderDetailRow>
         </OrderDetailsCard>
 
@@ -290,47 +380,55 @@ const CheckoutScreen = () => {
   return (
     <Container>
       <Title>Checkout</Title>
-      <Subtitle>Complete your purchase</Subtitle>
+      <Subtitle>Review your order and complete your purchase</Subtitle>
 
-      <OrderSummary>
-        <SummaryTitle>Order Summary</SummaryTitle>
-        {cartItems.map((item, index) => (
-          <SummaryRow key={item.id || index}>
-            <SummaryText>{item.name} (x{item.quantity})</SummaryText>
-            <SummaryAmount>₹{item.price * item.quantity}</SummaryAmount>
-          </SummaryRow>
-        ))}
-        <SummaryRow><SummaryText>Subtotal</SummaryText><SummaryAmount>₹{subtotal.toFixed(2)}</SummaryAmount></SummaryRow>
-        <SummaryRow><SummaryText>Delivery Fee</SummaryText><SummaryAmount>₹{deliveryFee.toFixed(2)}</SummaryAmount></SummaryRow>
-        <SummaryRow><SummaryText>Tax (5%)</SummaryText><SummaryAmount>₹{tax.toFixed(2)}</SummaryAmount></SummaryRow>
-        <TotalRow><TotalText>Total</TotalText><TotalAmount>₹{total.toFixed(2)}</TotalAmount></TotalRow>
-      </OrderSummary>
+      {cartItems.length > 0 ? (
+        <OrderSummary>
+          <SummaryTitle>Order Summary</SummaryTitle>
+          {cartItems.map((item, index) => (
+            <SummaryRow key={item.id ? `${item.id}-${index}` : `item-${index}`}> {/* More robust key */}
+              <SummaryText>{item.name} (x{item.quantity || 1})</SummaryText>
+              <SummaryAmount>₹{(item.price * (item.quantity || 1)).toFixed(2)}</SummaryAmount>
+            </SummaryRow>
+          ))}
+          <SummaryRow><SummaryText>Subtotal</SummaryText><SummaryAmount>₹{subtotal.toFixed(2)}</SummaryAmount></SummaryRow>
+          <SummaryRow><SummaryText>Delivery Fee</SummaryText><SummaryAmount>₹{deliveryFee.toFixed(2)}</SummaryAmount></SummaryRow>
+          <SummaryRow><SummaryText>Tax (5%)</SummaryText><SummaryAmount>₹{tax.toFixed(2)}</SummaryAmount></SummaryRow>
+          <TotalRow><TotalText>Total</TotalText><TotalAmount>₹{total.toFixed(2)}</TotalAmount></TotalRow>
+        </OrderSummary>
+      ) : (
+        <OrderSummary>
+             <SummaryTitle>Order Summary</SummaryTitle>
+             <Text style={{textAlign: 'center', color: '#7f8c8d', fontSize: 16, paddingVertical: 20}}>Your cart is empty. Add items to proceed.</Text>
+        </OrderSummary>
+      )}
+
 
       <PaymentSection>
-        <SectionTitle>Payment Method</SectionTitle>
+        <SectionTitle>Select Payment Method</SectionTitle>
 
         <PaymentOption selected={selectedPayment === 'online'} onPress={() => setSelectedPayment('online')} disabled={true}>
           <Icon source={getImageSource('online')} disabled={true} />
-          <PaymentText disabled={true}>Online Payment (Coming Soon)</PaymentText>
+          <PaymentText disabled={true} selected={selectedPayment === 'online'}>Online Payment (Coming Soon)</PaymentText>
         </PaymentOption>
 
         <PaymentOption selected={selectedPayment === 'netbanking'} onPress={() => setSelectedPayment('netbanking')} disabled={true}>
           <Icon source={getImageSource('netbanking')} disabled={true} />
-          <PaymentText disabled={true}>Net Banking (Coming Soon)</PaymentText>
+          <PaymentText disabled={true} selected={selectedPayment === 'netbanking'}>Net Banking (Coming Soon)</PaymentText>
         </PaymentOption>
 
         <PaymentOption selected={selectedPayment === 'qrcode'} onPress={() => setSelectedPayment('qrcode')} disabled={true}>
           <Icon source={getImageSource('qrcode')} disabled={true} />
-          <PaymentText disabled={true}>Scan QR Code (Coming Soon)</PaymentText>
+          <PaymentText disabled={true} selected={selectedPayment === 'qrcode'}>Scan QR Code (Coming Soon)</PaymentText>
         </PaymentOption>
 
         <PaymentOption selected={selectedPayment === 'cash'} onPress={() => setSelectedPayment('cash')}>
           <Icon source={getImageSource('cash')} />
-          <PaymentText>Cash Payment</PaymentText>
+          <PaymentText selected={selectedPayment === 'cash'}>Cash on Delivery</PaymentText>
         </PaymentOption>
       </PaymentSection>
 
-      <Button onPress={handleConfirmOrder} disabled={selectedPayment !== 'cash'}>
+      <Button onPress={handleConfirmOrder} disabled={selectedPayment !== 'cash' || cartItems.length === 0}>
         <ButtonText>Place Order</ButtonText>
       </Button>
     </Container>

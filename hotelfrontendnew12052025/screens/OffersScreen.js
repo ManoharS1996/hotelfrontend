@@ -14,7 +14,7 @@ const OffersScreen = ({ navigation }) => {
     {
       id: 1,
       name: 'Organic snacks',
-      price: '₹299',
+      price: 299,
       originalPrice: '₹599',
       discount: '50% OFF',
       image: require('../assets/snacks.jpg'),
@@ -28,7 +28,7 @@ const OffersScreen = ({ navigation }) => {
     {
       id: 2,
       name: 'Organic Sweets',
-      price: '₹199',
+      price: 199,
       originalPrice: '₹299',
       discount: '33% OFF',
       image: require('../assets/sweets.jpg'),
@@ -42,7 +42,7 @@ const OffersScreen = ({ navigation }) => {
     {
       id: 3,
       name: 'Sweets',
-      price: '₹249',
+      price: 249,
       originalPrice: '₹349',
       discount: '29% OFF',
       image: require('../assets/sweets1.jpg'),
@@ -56,7 +56,7 @@ const OffersScreen = ({ navigation }) => {
     {
       id: 4,
       name: 'Chocolate Shake',
-      price: '₹129',
+      price: 129,
       originalPrice: '₹179',
       discount: '28% OFF',
       image: require('../assets/shake.jpg'),
@@ -70,7 +70,7 @@ const OffersScreen = ({ navigation }) => {
     {
       id: 5,
       name: 'Combo Meal',
-      price: '₹499',
+      price: 499,
       originalPrice: '₹899',
       discount: '44% OFF',
       image: require('../assets/combo.jpg'),
@@ -84,7 +84,7 @@ const OffersScreen = ({ navigation }) => {
     {
       id: 6,
       name: 'Family Combo Pack',
-      price: '₹799',
+      price: 799,
       originalPrice: '₹1499',
       discount: '47% OFF',
       image: require('../assets/combo2.jpg'),
@@ -98,7 +98,7 @@ const OffersScreen = ({ navigation }) => {
     {
       id: 7,
       name: 'Weekend Special Burger Set',
-      price: '₹249',
+      price: 249,
       originalPrice: '₹399',
       discount: '38% OFF',
       image: require('../assets/burger.jpg'),
@@ -112,7 +112,7 @@ const OffersScreen = ({ navigation }) => {
     {
       id: 8,
       name: 'Weekend Special Pizza',
-      price: '₹399',
+      price: 399,
       originalPrice: '₹599',
       discount: '33% OFF',
       image: require('../assets/pizza.jpg'),
@@ -135,15 +135,19 @@ const OffersScreen = ({ navigation }) => {
   });
 
   const handleAddToCart = (offer) => {
+    const cartItem = {
+      id: offer.id,
+      name: offer.name,
+      description: offer.description,
+      price: offer.price,
+      image: offer.image,
+      quantity: 1
+    };
+    
     navigation.navigate('Cart', { 
-      addedItem: {
-        id: offer.id,
-        name: offer.name,
-        description: offer.description,
-        price: offer.price,
-        image: offer.image
-      }
+      addedItem: cartItem
     });
+    
     setSelectedOffer(null);
     Alert.alert('Success', `${offer.name} added to cart!`);
   };
@@ -175,7 +179,7 @@ const OffersScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.priceContainer}>
-              <Text style={styles.detailPrice}>{offer.price}</Text>
+              <Text style={styles.detailPrice}>₹{offer.price}</Text>
               <Text style={styles.originalPrice}>{offer.originalPrice}</Text>
               <Text style={styles.discount}>{offer.discount}</Text>
             </View>
@@ -253,7 +257,7 @@ const OffersScreen = ({ navigation }) => {
                 <Text style={styles.offerName} numberOfLines={1}>{offer.name}</Text>
 
                 <View style={styles.offerPriceContainer}>
-                  <Text style={styles.offerPrice}>{offer.price}</Text>
+                  <Text style={styles.offerPrice}>₹{offer.price}</Text>
                   <Text style={styles.offerOriginalPrice}>{offer.originalPrice}</Text>
                   <Text style={styles.offerDiscount}>{offer.discount}</Text>
                 </View>

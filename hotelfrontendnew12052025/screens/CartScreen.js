@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Text, Platform, KeyboardAvoidingView, FlatList } from 'react-native';
+import { View, ScrollView, Text, Platform, KeyboardAvoidingView, FlatList, Alert } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import styled from 'styled-components/native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -256,7 +257,7 @@ const CartScreen = () => {
   const route = useRoute();
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [cartItems, setCartItems] = useState(route.params?.cartItems || []);
+  const [cartItems, setCartItems] = useState([]);
 
   const continueItems = [
     {
@@ -283,26 +284,59 @@ const CartScreen = () => {
   ];
 
   useEffect(() => {
-    if (route.params?.cartItems) {
-      setCartItems(route.params.cartItems);
-    }
-  }, [route.params?.cartItems]);
+    const loadCartItems = async () => {
+      try {
+        const savedItems = await AsyncStorage.getItem('cartItems');
+        if (savedItems) {
+          setCartItems(JSON.parse(savedItems));
+        }
+      } catch (error) {
+        console.error('Error loading cart items:', error);
+      }
+    };
 
-  const addToCart = async (item) => {
+    loadCartItems();
+  }, []);
+
+  useEffect(() => {
+    if (route.params?.addedItem) {
+      // Check if the item already exists to avoid duplicate alerts from direct navigation
+      const itemExistsInCart = cartItems.some(cartItem => cartItem.id === route.params.addedItem.id);
+      if (!itemExistsInCart || (itemExistsInCart && route.params.addedItem.quantity === 1) ) { // Only add if truly new or quantity is 1 (initial add)
+         addToCart(route.params.addedItem, true); // Pass a flag to indicate it's from navigation
+      }
+      // Clear the param to prevent re-adding on screen focus or re-render
+      navigation.setParams({ addedItem: null });
+    }
+  }, [route.params?.addedItem, navigation, cartItems]); // Added cartItems to dependency array for existing item check
+
+
+  const addToCart = async (item, isFromNavigation = false) => {
     const existingItem = cartItems.find(i => i.id === item.id);
     let updatedCart;
-    
+
     if (existingItem) {
-      updatedCart = cartItems.map(i => 
-        i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+      updatedCart = cartItems.map(i =>
+        i.id === item.id ? { ...i, quantity: i.quantity + (item.quantity || 1) } : i // Use item.quantity if present, else 1
       );
     } else {
-      updatedCart = [...cartItems, { ...item, quantity: 1 }];
+      updatedCart = [...cartItems, { ...item, quantity: item.quantity || 1 }]; // Use item.quantity if present, else 1
     }
-    
+
     setCartItems(updatedCart);
-    await AsyncStorage.setItem('cartItems', JSON.stringify(updatedCart));
+    try {
+      await AsyncStorage.setItem('cartItems', JSON.stringify(updatedCart));
+      if (isFromNavigation || !existingItem) { // Show alert only if added via navigation or it's a brand new item
+          Alert.alert('Success', `${item.name} added to cart!`);
+      } else if (existingItem) {
+          // Optionally, you can show a different alert for quantity update
+          // Alert.alert('Success', `${item.name} quantity updated in cart!`);
+      }
+    } catch (error) {
+      console.error('Error saving cart items:', error);
+    }
   };
+
 
   const handleVoiceSearch = () => {
     setIsListening(true);
@@ -318,12 +352,63 @@ const CartScreen = () => {
   );
 
   const calculateSubtotal = () => filteredItems.reduce((total, item) => total + item.price * item.quantity, 0);
+
+  const getDeliveryFee = (subtotal) => subtotal > 500 ? 0 : 40;
+
+  const getTaxAmount = (subtotal) => subtotal * 0.05;
+
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
-    const delivery = subtotal > 500 ? 0 : 40;
-    const tax = subtotal * 0.05;
+    const delivery = getDeliveryFee(subtotal);
+    const tax = getTaxAmount(subtotal);
     return subtotal + delivery + tax;
   };
+
+  const handleProceedToCheckout = () => {
+    const subtotal = calculateSubtotal();
+    const deliveryFee = getDeliveryFee(subtotal);
+    const tax = getTaxAmount(subtotal);
+    const total = subtotal + deliveryFee + tax;
+
+    if (filteredItems.length === 0) {
+        Alert.alert("Empty Cart", "Please add items to your cart before proceeding to checkout.");
+        return;
+    }
+
+    navigation.navigate('Checkout', {
+      cartItems: filteredItems, // Send only filtered items or all cartItems based on your logic
+      subtotal: subtotal,
+      deliveryFee: deliveryFee,
+      tax: tax,
+      total: total,
+    });
+  };
+
+
+  const updateQuantity = async (itemId, change) => {
+    let updatedCart = cartItems.map(item =>
+      item.id === itemId ? { ...item, quantity: Math.max(0, item.quantity + change) } : item
+    ).filter(item => item.quantity > 0); // Remove item if quantity becomes 0
+
+    setCartItems(updatedCart);
+    try {
+      await AsyncStorage.setItem('cartItems', JSON.stringify(updatedCart));
+    } catch (error) {
+      console.error('Error updating cart items:', error);
+    }
+  };
+
+  const removeItemFromCart = async (itemId) => {
+    const updatedCart = cartItems.filter(item => item.id !== itemId);
+    setCartItems(updatedCart);
+    try {
+      await AsyncStorage.setItem('cartItems', JSON.stringify(updatedCart));
+      Alert.alert('Removed', `Item removed from cart.`);
+    } catch (error) {
+      console.error('Error removing item from cart:', error);
+    }
+  };
+
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -350,10 +435,15 @@ const CartScreen = () => {
         <ScrollView>
           <Title>My Cart ({filteredItems.length})</Title>
 
-          {filteredItems.length === 0 ? (
+          {filteredItems.length === 0 && searchQuery === '' ? ( // Show empty cart only if no search query or search yields no results
             <EmptyCartContainer>
               <MaterialIcons name="remove-shopping-cart" size={60} color="#ccc" />
               <EmptyCartText>Your cart is empty</EmptyCartText>
+            </EmptyCartContainer>
+          ) : filteredItems.length === 0 && searchQuery !== '' ? (
+            <EmptyCartContainer>
+                 <FontAwesome name="search" size={50} color="#ccc" />
+                 <EmptyCartText>No items found for "{searchQuery}"</EmptyCartText>
             </EmptyCartContainer>
           ) : (
             <>
@@ -365,30 +455,19 @@ const CartScreen = () => {
                       <View>
                         <ItemName>{item.name}</ItemName>
                         <ItemDesc>{item.description}</ItemDesc>
-                        <ItemPrice>₹{item.price * item.quantity}</ItemPrice>
+                        <ItemPrice>₹{(item.price * item.quantity).toFixed(2)}</ItemPrice>
                       </View>
                       <View>
                         <QuantityContainer>
-                          <QuantityButton onPress={() => addToCart({ ...item, quantity: 1 })}>
+                          <QuantityButton onPress={() => updateQuantity(item.id, 1)}>
                             <Text>+</Text>
                           </QuantityButton>
                           <QuantityText>{item.quantity}</QuantityText>
-                          <QuantityButton onPress={() => {
-                            const updatedItems = cartItems.map(i => 
-                              i.id === item.id && i.quantity > 1 ? 
-                              { ...i, quantity: i.quantity - 1 } : i
-                            );
-                            setCartItems(updatedItems);
-                            AsyncStorage.setItem('cartItems', JSON.stringify(updatedItems));
-                          }}>
+                          <QuantityButton onPress={() => updateQuantity(item.id, -1)}>
                             <Text>-</Text>
                           </QuantityButton>
                         </QuantityContainer>
-                        <RemoveButton onPress={async () => {
-                          const updatedItems = cartItems.filter(i => i.id !== item.id);
-                          setCartItems(updatedItems);
-                          await AsyncStorage.setItem('cartItems', JSON.stringify(updatedItems));
-                        }}>
+                        <RemoveButton onPress={() => removeItemFromCart(item.id)}>
                           <RemoveText>Remove</RemoveText>
                         </RemoveButton>
                       </View>
@@ -399,12 +478,12 @@ const CartScreen = () => {
 
               <SummaryContainer>
                 <SummaryRow><SummaryText>Subtotal</SummaryText><SummaryAmount>₹{calculateSubtotal().toFixed(2)}</SummaryAmount></SummaryRow>
-                <SummaryRow><SummaryText>Delivery</SummaryText><SummaryAmount>₹{calculateSubtotal() > 500 ? 0 : 40}</SummaryAmount></SummaryRow>
-                <SummaryRow><SummaryText>Tax (5%)</SummaryText><SummaryAmount>₹{(calculateSubtotal() * 0.05).toFixed(2)}</SummaryAmount></SummaryRow>
+                <SummaryRow><SummaryText>Delivery</SummaryText><SummaryAmount>₹{getDeliveryFee(calculateSubtotal()).toFixed(2)}</SummaryAmount></SummaryRow>
+                <SummaryRow><SummaryText>Tax (5%)</SummaryText><SummaryAmount>₹{getTaxAmount(calculateSubtotal()).toFixed(2)}</SummaryAmount></SummaryRow>
                 <SummaryRow><TotalText>Total</TotalText><TotalAmount>₹{calculateTotal().toFixed(2)}</TotalAmount></SummaryRow>
               </SummaryContainer>
 
-              <CheckoutButton onPress={() => navigation.navigate('Checkout')}>
+              <CheckoutButton onPress={handleProceedToCheckout}>
                 <CheckoutText>Proceed to Checkout</CheckoutText>
               </CheckoutButton>
 
@@ -424,6 +503,7 @@ const CartScreen = () => {
                   </SuggestionCard>
                 )}
                 showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 5 }}
               />
             </>
           )}
